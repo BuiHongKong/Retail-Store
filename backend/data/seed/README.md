@@ -1,7 +1,7 @@
 # Seed data
 
 - **categories.json**: 3 categories — character, food, animal.
-- **products.json**: 9 products, mỗi product có `imagePath` trỏ tới file trong `assets/`.
+- **products.json**: 9 products, mỗi product có `imageUrl` (URL đầy đủ) trỏ tới file trong `assets/`.
 
 Mapping assets → product slug:
 

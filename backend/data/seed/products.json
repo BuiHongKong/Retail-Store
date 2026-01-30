@@ -7,7 +7,7 @@
     "categoryId": "cat-character",
     "price": 199000,
     "currency": "VND",
-    "imagePath": "/assets/amongus-character.png",
+    "imageUrl": "http://localhost:5173/assets/amongus-character.png",
     "stock": 50,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -20,7 +20,7 @@
     "categoryId": "cat-character",
     "price": 159000,
     "currency": "VND",
-    "imagePath": "/assets/baby-character.png",
+    "imageUrl": "http://localhost:5173/assets/baby-character.png",
     "stock": 30,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -33,7 +33,7 @@
     "categoryId": "cat-character",
     "price": 129000,
     "currency": "VND",
-    "imagePath": "/assets/frog-character.png",
+    "imageUrl": "http://localhost:5173/assets/frog-character.png",
     "stock": 40,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -46,7 +46,7 @@
     "categoryId": "cat-character",
     "price": 249000,
     "currency": "VND",
-    "imagePath": "/assets/godofweath-character.png",
+    "imageUrl": "http://localhost:5173/assets/godofweath-character.png",
     "stock": 20,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -59,7 +59,7 @@
     "categoryId": "cat-food",
     "price": 139000,
     "currency": "VND",
-    "imagePath": "/assets/breakfast-food.png",
+    "imageUrl": "http://localhost:5173/assets/breakfast-food.png",
     "stock": 35,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -72,7 +72,7 @@
     "categoryId": "cat-food",
     "price": 99000,
     "currency": "VND",
-    "imagePath": "/assets/cheese-food.png",
+    "imageUrl": "http://localhost:5173/assets/cheese-food.png",
     "stock": 45,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -85,7 +85,7 @@
     "categoryId": "cat-food",
     "price": 179000,
     "currency": "VND",
-    "imagePath": "/assets/ramen-food.png",
+    "imageUrl": "http://localhost:5173/assets/ramen-food.png",
     "stock": 25,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -98,7 +98,7 @@
     "categoryId": "cat-animal",
     "price": 169000,
     "currency": "VND",
-    "imagePath": "/assets/cat-animal.png",
+    "imageUrl": "http://localhost:5173/assets/cat-animal.png",
     "stock": 60,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -111,7 +111,7 @@
     "categoryId": "cat-animal",
     "price": 169000,
     "currency": "VND",
-    "imagePath": "/assets/dog-animal.png",
+    "imageUrl": "http://localhost:5173/assets/dog-animal.png",
     "stock": 55,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
