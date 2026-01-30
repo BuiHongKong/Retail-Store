@@ -12,7 +12,7 @@ app.use(express.json());
 const assetsPath = path.join(__dirname, "..", "assets");
 app.use("/assets", express.static(assetsPath));
 
-// API product + likes (Prisma + PostgreSQL). Cart chạy service riêng.
+// API product + likes (Prisma + PostgreSQL). Cart chạy service riêng (dev:cart).
 app.use("/api", productRouter);
 
 app.listen(PORT, () => {

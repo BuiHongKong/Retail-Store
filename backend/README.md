@@ -119,14 +119,15 @@ npm run dev
 | Cài dependency | Trong `backend/`: `npm install` |
 | Tạo/sửa bảng (migration) | Trong `backend/`: `npx prisma migrate dev --name <tên>` |
 | Seed lại dữ liệu | Trong `backend/`: `npx prisma db seed` |
-| Chạy API | Trong `backend/`: `npm run dev` |
+| Chạy API (product + likes) | Trong `backend/`: `npm run dev` |
+| Chạy Cart API (service riêng) | Trong `backend/`: `npm run dev:cart` (port 3001) |
 | Dừng Postgres (Docker) | Ở root project: `docker compose down` |
 
 ---
 
 ## API
 
-**Khi chạy `npm run dev` ở backend này:** chỉ có API sản phẩm và like. Giỏ hàng (cart) chạy service riêng, không mount ở đây.
+**Backend chính (`npm run dev`):** API sản phẩm và like. **Cart chạy riêng** (`npm run dev:cart`) — xem [Cart service (chạy riêng)](#cart-service-chạy-riêng) bên dưới.
 
 | Method | Path | Mô tả |
 |--------|------|--------|
@@ -140,12 +141,28 @@ npm run dev
 
 ---
 
+## Cart service (chạy riêng)
+
+Cart API chạy process riêng, port riêng (dùng chung DB với backend chính).
+
+- **Chạy:** trong `backend/` gõ `npm run dev:cart`.
+- **Base URL:** `http://localhost:3001/api` (port từ env `CART_PORT`, mặc định 3001).
+- **Env (tuỳ chọn):**
+  - `CART_PORT` — port cho Cart API (mặc định 3001).
+  - `CORS_ORIGIN` — origin frontend được phép gọi (mặc định `http://localhost:5173`). Cần set đúng để tránh lỗi CORS.
+- **API cart:** GET/POST `/api/cart`, POST/PATCH/DELETE `/api/cart/items` (header `x-cart-session`).
+
+Frontend cần gọi **hai base URL**: product/likes → `http://localhost:3000/api`, cart → `http://localhost:3001/api`.
+
+---
+
 ## Scripts trong `package.json`
 
 | Script | Mô tả |
 |--------|--------|
 | `npm start` | Chạy server (production) |
-| `npm run dev` | Chạy server với --watch |
+| `npm run dev` | Chạy server product + likes (port 3000) |
+| `npm run dev:cart` | Chạy Cart API riêng (port CART_PORT, mặc định 3001) |
 | `npm run prisma:generate` | Generate Prisma Client |
 | `npm run prisma:migrate` | Chạy migration (dev) |
 | `npm run prisma:push` | Đẩy schema lên DB (không tạo file migration) |
