@@ -13,18 +13,21 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.45rem 5rem;
   background: var(--surface);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-soft);
   box-shadow: var(--shadow-soft);
+ 
 }
 
 .app__logo {
-  font-size: 1.25rem;
+  font-size: 2.25rem;
   font-weight: 800;
-  color: var(--text);
   letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #db2777 0%, #ec4899 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .app__header-actions {
