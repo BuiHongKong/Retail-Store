@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useCart } from "../cart/CartContext";
 import { fetchProductBySlug } from "../product/api";
 import type { Product } from "../product/types";
 import { HeartIcon } from "./HeartIcon";
@@ -47,6 +48,7 @@ export function ProductCard({ slug, product: productProp }: ProductCardProps) {
   const [liked, setLiked] = useState(() => (productProp ? getLikedIds().has(productProp.id) : false));
 
   const displayProduct = productProp ?? product;
+  const { addItem } = useCart();
 
   const toggleLiked = useCallback(() => {
     const p = productProp ?? product;
@@ -114,6 +116,13 @@ export function ProductCard({ slug, product: productProp }: ProductCardProps) {
           <span className="product-card__rating-count">({displayProduct.ratingCount} đánh giá)</span>
         </div>
         <p className="product-card__price">{formatPrice(displayProduct.price, displayProduct.currency)}</p>
+        <button
+          type="button"
+          className="product-card__add-cart"
+          onClick={() => addItem(displayProduct.id)}
+        >
+          Thêm vào giỏ
+        </button>
       </div>
     </article>
   );

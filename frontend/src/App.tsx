@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { CartDropdown } from "./components/CartDropdown";
 import { ProductCard } from "./components/ProductCard";
 import { ProductFilter, type FilterState } from "./components/ProductFilter";
 import { fetchProducts } from "./product/api";
@@ -59,10 +60,36 @@ function App() {
   const filteredProducts = useMemo(() => filterProducts(products, filter), [products, filter]);
   const priceRange = useMemo(() => getPriceRange(products), [products]);
 
+  const [cartOpen, setCartOpen] = useState(false);
+  const cartTriggerRef = useRef<HTMLButtonElement>(null);
+  const cartDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!cartOpen) return;
+    function handleClick(e: MouseEvent) {
+      const target = e.target as Node;
+      if (
+        cartTriggerRef.current?.contains(target) ||
+        cartDropdownRef.current?.contains(target)
+      )
+        return;
+      setCartOpen(false);
+    }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [cartOpen]);
+
   return (
     <main className="app">
       <header className="app__header">
         <span className="app__logo">Retail Store</span>
+        <CartDropdown
+          isOpen={cartOpen}
+          onToggle={() => setCartOpen((prev) => !prev)}
+          onClose={() => setCartOpen(false)}
+          triggerRef={cartTriggerRef}
+          dropdownRef={cartDropdownRef}
+        />
       </header>
 
       <section className="app__hero" id="top">
@@ -75,7 +102,7 @@ function App() {
           <div className="app__hero-overlay">
             <h1 className="app__hero-title">Cute vừa đủ, yêu hơi nhiều</h1>
             <a href="#products" className="app__hero-cta" role="button">
-              Vô coi cho vui
+              <span className="app__hero-cta-inner">Vô coi cho vui</span>
             </a>
           </div>
         </div>

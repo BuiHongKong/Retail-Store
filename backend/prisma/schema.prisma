@@ -34,6 +34,30 @@ model Product {
   stock       Int
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
+  cartItems   CartItem[]
 
   @@map("products")
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  sessionId String     @unique @map("session_id")
+  items     CartItem[]
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
 }
