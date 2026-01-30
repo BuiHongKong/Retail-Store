@@ -1,20 +1,20 @@
 [
   {
-    "id": "cat-character",
+    "id": "character",
     "slug": "character",
     "name": "Character",
     "description": "Plush toys inspired by characters",
     "sortOrder": 1
   },
   {
-    "id": "cat-food",
+    "id": "food",
     "slug": "food",
     "name": "Food",
     "description": "Food-shaped plush toys",
     "sortOrder": 2
   },
   {
-    "id": "cat-animal",
+    "id": "animal",
     "slug": "animal",
     "name": "Animal",
     "description": "Animal plush toys",
