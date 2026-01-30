@@ -11,6 +11,8 @@
   z-index: 10;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   padding: 0.75rem 1.5rem;
   background: var(--surface);
   backdrop-filter: blur(10px);
@@ -23,6 +25,13 @@
   font-weight: 800;
   color: var(--text);
   letter-spacing: -0.03em;
+}
+
+.app__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 /* Hero — banner + tiêu đề & CTA overlay */
@@ -62,6 +71,16 @@
   pointer-events: auto;
 }
 
+@keyframes hero-title-scale {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.92);
+  }
+}
+
 .app__hero-title {
   margin: 0;
   font-size: clamp(2rem, 5.5vw, 3rem);
@@ -74,9 +93,24 @@
     0 0 48px rgba(255, 255, 255, 0.4),
     0 0 64px rgba(254, 240, 248, 0.35),
     0 2px 4px rgba(90, 70, 110, 0.2);
+  animation: hero-title-scale 2.5s ease-in-out infinite;
+}
+
+/* 3s một chu kỳ: quét 2.2s (tốc độ cũ), dừng ~0.8s rồi lặp */
+@keyframes cta-light-swipe {
+  0% {
+    transform: translateX(-100%);
+  }
+  73.33% {
+    transform: translateX(300%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
 }
 
 .app__hero-cta {
+  position: relative;
   display: inline-block;
   padding: 0.75rem 1.75rem;
   font-size: 1.05rem;
@@ -89,6 +123,30 @@
   transition: transform 0.15s, box-shadow 0.15s;
   text-decoration: none;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.app__hero-cta-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.app__hero-cta::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: cta-light-swipe 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .app__hero-cta:hover {

@@ -1,0 +1,75 @@
+// Retail Store — PostgreSQL + Prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String    @id
+  slug        String    @unique
+  name        String
+  description String?
+  sortOrder   Int       @map("sort_order")
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id
+  slug        String   @unique
+  name        String
+  description String?
+  categoryId   String   @map("category_id")
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  price       Int      // smallest unit, e.g. VND
+  currency    String
+  imageUrl    String   @map("image_url")
+  rating      Float
+  ratingCount Int      @map("rating_count")
+  stock       Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  cartItems   CartItem[]
+  likes       Like[]
+
+  @@map("products")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  sessionId String   @map("session_id")
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([sessionId, productId])
+  @@map("likes")
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  sessionId String     @unique @map("session_id")
+  items     CartItem[]
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String   @map("cart_id")
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
+}
