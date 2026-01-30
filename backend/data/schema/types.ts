@@ -22,6 +22,8 @@ export interface Product {
   price: number;        // in smallest unit, e.g. cents or VND
   currency: string;     // e.g. "VND" | "USD"
   imageUrl: string;     // full URL to image (e.g. app origin in dev, CDN in prod)
+  rating: number;      // average rating 0–5
+  ratingCount: number;  // number of reviews
   stock: number;
   createdAt: string;    // ISO 8601
   updatedAt: string;

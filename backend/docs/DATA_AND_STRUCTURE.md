@@ -13,9 +13,11 @@
 │ name            │         │ name            │
 │ description?    │         │ description?    │
 │ sortOrder       │         │ categoryId (FK) │
-└─────────────────┘         │ price           │
+└─────────────────┘                                     │ price           │
                             │ currency        │
                             │ imageUrl        │
+                            │ rating          │
+                            │ ratingCount     │
                             │ stock           │
                             │ createdAt       │
                             │ updatedAt       │
@@ -117,3 +119,52 @@ Frontend chỉ cần biết 3 endpoint này và shape trong `backend/data/schema
 - **stock**: Cần cập nhật khi có order (sẽ cần thêm bảng Order/OrderItem sau).
 
 Nếu bạn muốn, bước tiếp theo có thể là: thêm Prisma schema + script seed DB từ `backend/data/seed/*.json`.
+
+---
+
+## 6. Giỏ hàng (cart) — định hướng
+
+Khi thêm chức năng **giỏ hàng** và **bỏ sản phẩm vào giỏ**, làm theo thứ tự dưới đây.
+
+### 6.1 Chọn nơi lưu giỏ hàng
+
+| Cách | Khi nào dùng | Ghi chú |
+|------|--------------|---------|
+| **Chỉ frontend** (state + localStorage) | Không cần đăng nhập; giỏ đơn giản, mất khi xóa storage. | Nhanh, không cần API cart. Frontend lưu `{ productId, quantity }[]`, tự tính tổng từ danh sách product. |
+| **Backend** (DB + session/user) | Cần giỏ đồng bộ nhiều thiết bị, hoặc trước khi có checkout. | Cần bảng Cart/CartItem (hoặc dùng session). API: lấy/cập nhật/xóa giỏ. |
+
+**Đề xuất**: Bắt đầu với **cart chỉ ở frontend** (state + localStorage). Khi cần đăng nhập hoặc checkout qua backend thì thêm API + bảng Cart.
+
+### 6.2 Data shape (khi có cart)
+
+Thêm vào `backend/data/schema/types.ts` (dùng cho frontend state hoặc API):
+
+- **CartItem**: `productId`, `quantity` (số lượng). Có thể thêm `product` (Product) khi API trả về giỏ kèm thông tin sản phẩm.
+- **Cart**: danh sách `items: CartItem[]`; có thể thêm `total` (tổng tiền) tính từ server hoặc client.
+
+Khi lưu backend: thêm bảng `Cart` (id, userId hoặc sessionId, updatedAt) và `CartItem` (cartId, productId, quantity).
+
+### 6.3 API (nếu cart lưu backend)
+
+- `GET /api/cart` → trả giỏ của user/session (items + product info).
+- `POST /api/cart/items` — body `{ productId, quantity }` — thêm/sửa số lượng.
+- `PATCH /api/cart/items/:productId` — body `{ quantity }` — sửa số lượng.
+- `DELETE /api/cart/items/:productId` — xóa một món khỏi giỏ.
+
+Validate: `productId` tồn tại, `quantity` ≤ stock, quantity > 0.
+
+### 6.4 Frontend — "Thêm vào giỏ"
+
+1. **State**: Dùng React Context, Zustand, hoặc Redux lưu giỏ dạng `{ productId: quantity }` hoặc `CartItem[]`.
+2. **Persist**: Nếu cart chỉ ở client, ghi/đọc từ `localStorage` khi thay đổi giỏ.
+3. **Nút "Thêm vào giỏ"**: Gọi `addToCart(productId, quantity)` → cập nhật state (và localStorage hoặc gọi API cart).
+4. **Hiển thị giỏ**: Trang/component giỏ đọc state (hoặc GET /api/cart), map productId → lấy tên/giá/ảnh từ danh sách product (đã load hoặc từ API). Tự tính tổng hoặc dùng `total` từ API.
+
+### 6.5 Thứ tự làm gợi ý
+
+1. **Có backend API (categories, products)** — đã định hướng ở mục 4.
+2. **Frontend**: Trang danh sách sản phẩm + trang chi tiết sản phẩm; nút "Thêm vào giỏ" chỉ cập nhật state (chưa gọi API cart).
+3. **State giỏ**: Context/store lưu `CartItem[]`, sync localStorage.
+4. **Trang giỏ**: Hiển thị items, số lượng, tổng tiền; nút tăng/giảm/xóa.
+5. **(Tùy chọn)** Khi cần: đăng nhập + API cart + lưu giỏ vào DB.
+6. **(Sau này)** Checkout → tạo Order/OrderItem, trừ stock (đã nêu ở mục 5).

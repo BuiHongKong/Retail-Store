@@ -8,6 +8,8 @@
     "price": 199000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/amongus-character.png",
+    "rating": 4.5,
+    "ratingCount": 24,
     "stock": 50,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -21,6 +23,8 @@
     "price": 159000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/baby-character.png",
+    "rating": 4.2,
+    "ratingCount": 18,
     "stock": 30,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -34,6 +38,8 @@
     "price": 129000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/frog-character.png",
+    "rating": 4.8,
+    "ratingCount": 31,
     "stock": 40,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -47,6 +53,8 @@
     "price": 249000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/godofweath-character.png",
+    "rating": 4.9,
+    "ratingCount": 42,
     "stock": 20,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -60,6 +68,8 @@
     "price": 139000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/breakfast-food.png",
+    "rating": 4.0,
+    "ratingCount": 12,
     "stock": 35,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -73,6 +83,8 @@
     "price": 99000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/cheese-food.png",
+    "rating": 4.6,
+    "ratingCount": 28,
     "stock": 45,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -86,6 +98,8 @@
     "price": 179000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/ramen-food.png",
+    "rating": 4.7,
+    "ratingCount": 19,
     "stock": 25,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -99,6 +113,8 @@
     "price": 169000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/cat-animal.png",
+    "rating": 4.9,
+    "ratingCount": 56,
     "stock": 60,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
@@ -112,6 +128,8 @@
     "price": 169000,
     "currency": "VND",
     "imageUrl": "http://localhost:5173/assets/dog-animal.png",
+    "rating": 4.8,
+    "ratingCount": 38,
     "stock": 55,
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z"
