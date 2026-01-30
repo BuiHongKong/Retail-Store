@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import type { Product } from "../types/product";
+import { fetchProductBySlug } from "../product/api";
+import type { Product } from "../product/types";
 import { HeartIcon } from "./HeartIcon";
 import "./ProductCard.css";
 
-const API_BASE = "/api";
 const LIKED_STORAGE_KEY = "retail-store-liked";
 
 function getLikedIds(): Set<string> {
@@ -62,12 +62,8 @@ export function ProductCard({ slug, product: productProp }: ProductCardProps) {
     if (productProp) return;
     let cancelled = false;
     const ctrl = new AbortController();
-    fetch(`${API_BASE}/products/${slug}`, { signal: ctrl.signal })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data: Product) => {
+    fetchProductBySlug(slug, ctrl.signal)
+      .then((data) => {
         if (!cancelled) {
           setProduct(data);
           setLiked(getLikedIds().has(data.id));

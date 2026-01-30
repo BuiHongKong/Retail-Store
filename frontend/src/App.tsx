@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { ProductCard } from "./components/ProductCard";
 import { ProductFilter, type FilterState } from "./components/ProductFilter";
-import type { Product } from "./types/product";
+import { fetchProducts } from "./product/api";
+import type { Product } from "./product/types";
 import "./App.css";
 
-const API_BASE = "/api";
 const DEFAULT_FILTER: FilterState = { categoryIds: [], priceMax: "" };
 
 /** Lấy min/max giá từ danh sách sản phẩm — tự cập nhật khi có sản phẩm mới giá cao/thấp hơn */
@@ -33,12 +33,8 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${API_BASE}/products`)
-      .then((res) => {
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return res.json();
-      })
-      .then((data: Product[]) => {
+    fetchProducts()
+      .then((data) => {
         if (!cancelled) {
           setProducts(Array.isArray(data) ? data : []);
           setApiError(null);
