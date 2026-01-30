@@ -35,8 +35,20 @@ model Product {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
   cartItems   CartItem[]
+  likes       Like[]
 
   @@map("products")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  sessionId String   @map("session_id")
+  productId String   @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([sessionId, productId])
+  @@map("likes")
 }
 
 model Cart {

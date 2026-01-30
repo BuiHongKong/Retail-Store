@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useProductsReady } from "../ProductsReadyContext";
 import {
   addCartItem as apiAdd,
   clearCart as apiClearCart,
@@ -33,6 +34,7 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const productsReady = useProductsReady();
   const [items, setItems] = useState<CartItem[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(() => getStoredSessionId());
   const [loading, setLoading] = useState(true);
@@ -55,8 +57,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    refreshCart();
-  }, [refreshCart]);
+    if (productsReady) refreshCart();
+  }, [productsReady, refreshCart]);
 
   const addItem = useCallback(
     async (productId: string, quantity = 1) => {

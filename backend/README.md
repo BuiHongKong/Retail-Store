@@ -126,15 +126,16 @@ npm run dev
 
 ## API
 
+**Khi chạy `npm run dev` ở backend này:** chỉ có API sản phẩm và like. Giỏ hàng (cart) chạy service riêng, không mount ở đây.
+
 | Method | Path | Mô tả |
 |--------|------|--------|
 | GET | `/api/products` | Danh sách sản phẩm |
 | GET | `/api/products/:slug` | Chi tiết sản phẩm theo slug |
 | GET | `/api/categories` | Danh sách category |
-| GET | `/api/cart` | Giỏ hàng (header `X-Cart-Session`; nếu không có thì tạo giỏ mới, trả về `sessionId`) |
-| POST | `/api/cart/items` | Thêm sản phẩm (body `{ productId, quantity? }`, header `X-Cart-Session`) |
-| PATCH | `/api/cart/items/:productId` | Cập nhật số lượng (body `{ quantity }`, header `X-Cart-Session`) |
-| DELETE | `/api/cart/items/:productId` | Xóa sản phẩm khỏi giỏ (header `X-Cart-Session`) |
+| GET | `/api/likes` | Danh sách sản phẩm đã thích (header `X-Likes-Session`; không có thì trả `sessionId` mới + `items: []`) |
+| POST | `/api/likes/items` | Thêm like (body `{ productId }`, header `X-Likes-Session`; không có thì tạo session mới) |
+| DELETE | `/api/likes/items/:productId` | Bỏ like (header `X-Likes-Session`) |
 | GET | `/assets/*` | Static (ảnh sản phẩm, banner) |
 
 ---
@@ -160,17 +161,17 @@ backend/
 ├── .env                 # Biến môi trường (tạo từ .env.example)
 ├── .env.example         # Mẫu DATABASE_URL, PORT
 ├── prisma/
-│   ├── schema.prisma    # Schema DB (Category, Product, Cart, CartItem)
+│   ├── schema.prisma    # Schema DB (Category, Product, Cart, CartItem, Like)
 │   ├── seed.js          # Seed từ data/seed/products.json
 │   └── migrations/      # Migration files (sau bước 4)
 ├── data/seed/
 │   └── products.json    # Dữ liệu mẫu sản phẩm
 ├── services/product/
-│   └── router.js        # Routes /api/products, /api/categories
-├── services/cart/
-│   └── router.js        # Routes /api/cart, /api/cart/items
+│   └── router.js        # Routes /api/products, /api/categories, /api/likes, /api/likes/items
+├── services/cart/       # Code cart (chưa mount; cart chạy service riêng)
+│   └── router.js
 ├── src/
-│   └── index.js        # Entry: assets + mount API
+│   └── index.js        # Entry: assets + product router only
 └── assets/             # Ảnh (banner, sản phẩm)
 ```
 

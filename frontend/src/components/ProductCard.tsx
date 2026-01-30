@@ -1,34 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useCart } from "../cart/CartContext";
+import { useLikes } from "../likes/LikesContext";
 import { fetchProductBySlug } from "../product/api";
 import type { Product } from "../product/types";
 import { HeartIcon } from "./HeartIcon";
 import "./ProductCard.css";
 
-const LIKED_STORAGE_KEY = "retail-store-liked";
-
-function getLikedIds(): Set<string> {
-  try {
-    const raw = localStorage.getItem(LIKED_STORAGE_KEY);
-    if (!raw) return new Set();
-    const arr = JSON.parse(raw) as string[];
-    return new Set(Array.isArray(arr) ? arr : []);
-  } catch {
-    return new Set();
-  }
-}
-
-function saveLikedIds(ids: Set<string>) {
-  try {
-    localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify([...ids]));
-  } catch {
-    // ignore
-  }
-}
-
 interface ProductCardProps {
   slug: string;
   product?: Product;
+  /** Chỉ cho phép thêm giỏ / like sau khi danh sách product đã load */
+  productsReady?: boolean;
 }
 
 function formatPrice(price: number, currency: string): string {
@@ -41,24 +23,22 @@ function formatPrice(price: number, currency: string): string {
   return `${currency} ${price}`;
 }
 
-export function ProductCard({ slug, product: productProp }: ProductCardProps) {
+export function ProductCard({ slug, product: productProp, productsReady = true }: ProductCardProps) {
   const [product, setProduct] = useState<Product | null>(productProp ?? null);
   const [loading, setLoading] = useState(!productProp);
   const [error, setError] = useState<string | null>(null);
-  const [liked, setLiked] = useState(() => (productProp ? getLikedIds().has(productProp.id) : false));
 
   const displayProduct = productProp ?? product;
   const { addItem } = useCart();
+  const { isLiked, addLike, removeLike } = useLikes();
+  const liked = displayProduct ? isLiked(displayProduct.id) : false;
 
   const toggleLiked = useCallback(() => {
     const p = productProp ?? product;
     if (!p) return;
-    const ids = getLikedIds();
-    if (ids.has(p.id)) ids.delete(p.id);
-    else ids.add(p.id);
-    saveLikedIds(ids);
-    setLiked(ids.has(p.id));
-  }, [productProp, product]);
+    if (liked) removeLike(p.id);
+    else addLike(p.id);
+  }, [productProp, product, liked, addLike, removeLike]);
 
   useEffect(() => {
     if (productProp) return;
@@ -66,10 +46,7 @@ export function ProductCard({ slug, product: productProp }: ProductCardProps) {
     const ctrl = new AbortController();
     fetchProductBySlug(slug, ctrl.signal)
       .then((data) => {
-        if (!cancelled) {
-          setProduct(data);
-          setLiked(getLikedIds().has(data.id));
-        }
+        if (!cancelled) setProduct(data);
       })
       .catch((err) => {
         if (!cancelled && err?.name !== "AbortError")
@@ -100,6 +77,7 @@ export function ProductCard({ slug, product: productProp }: ProductCardProps) {
           type="button"
           className={`product-card__like ${liked ? "product-card__like--active" : ""}`}
           onClick={toggleLiked}
+          disabled={!productsReady}
           aria-label={liked ? "Bỏ thích" : "Thích"}
           title={liked ? "Bỏ thích" : "Thích"}
         >
@@ -120,6 +98,7 @@ export function ProductCard({ slug, product: productProp }: ProductCardProps) {
           type="button"
           className="product-card__add-cart"
           onClick={() => addItem(displayProduct.id)}
+          disabled={!productsReady}
         >
           Thêm vào giỏ
         </button>

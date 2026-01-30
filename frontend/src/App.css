@@ -27,6 +27,13 @@
   letter-spacing: -0.03em;
 }
 
+.app__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
 /* Hero — banner + tiêu đề & CTA overlay */
 .app__hero {
   padding: 0;
