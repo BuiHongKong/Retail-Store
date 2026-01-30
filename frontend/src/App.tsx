@@ -109,7 +109,7 @@ function App() {
         <LikesProvider>
           <main className="app">
             <header className="app__header">
-              <span className="app__logo">Retail Store</span>
+              <span className="app__logo">Plush Haven</span>
               <div className="app__header-actions">
                 <LikesDropdown
                   isOpen={likesOpen}
