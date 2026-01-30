@@ -1,0 +1,85 @@
+:root {
+  font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Bright confetti — Cute & Girly Palette #23 */
+  --accent-lavender: #C5B5E2;
+  --accent-peach: #FDC89C;
+  --accent-teal: #09BBC9;
+  --accent-pink: #FEAFC5;
+  --accent-coral: #FD8BAD;
+  --accent-lavender-rgb: 197, 181, 226;
+  --accent-coral-rgb: 253, 139, 173;
+  --accent-teal-rgb: 9, 187, 201;
+  --accent-green: #7cb083;
+  --accent-green-rgb: 124, 176, 131;
+
+  --bg-gradient-start: #f5f0fc;
+  --bg-gradient-end: #fef0f5;
+  --surface: rgba(255, 252, 254, 0.95);
+  --surface-card: rgba(255, 253, 254, 0.98);
+  --text: #2d2438;
+  --text-soft: #4a3d58;
+  --border-soft: rgba(197, 181, 226, 0.5);
+  --shadow-soft: 0 4px 20px rgba(197, 181, 226, 0.3);
+  --shadow-card: 0 4px 14px rgba(253, 139, 173, 0.12);
+  --rating-color: #b86b3d;
+  --price-color: var(--accent-teal);
+  --bg-product: linear-gradient(180deg, #fef8fb 0%, #fefafc 50%, #fffafc 100%);
+  --glow-border: #fff8fa;
+  --glow-border-rgb: 255, 248, 250;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  background-attachment: fixed;
+}
+
+a {
+  font-weight: 600;
+  color: var(--text-soft);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--accent-teal);
+}
+
+h1, h2 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+button {
+  border-radius: 999px;
+  border: none;
+  padding: 0.6em 1.25em;
+  font-size: 1em;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+button:hover {
+  transform: translateY(-1px);
+}
+button:focus-visible {
+  outline: 2px solid var(--accent-lavender);
+  outline-offset: 2px;
+}
+
+#root {
+  min-height: 100vh;
+}
