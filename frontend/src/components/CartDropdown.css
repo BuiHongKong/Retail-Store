@@ -212,12 +212,37 @@
 
 .app__cart-dropdown-footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-top: 1px solid var(--border-soft);
   background: var(--surface);
+}
+
+.app__cart-dropdown-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.app__cart-checkout-link {
+  display: block;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent-teal) 0%, #0a9ba8 100%);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.app__cart-checkout-link:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  color: #fff;
 }
 
 .app__cart-total-label {

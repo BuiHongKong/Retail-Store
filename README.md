@@ -16,16 +16,17 @@ Web bán thú nhồi bông: frontend React (Vite) + backend Express (API sản p
 
 ```
 Retail-Store/
-├── backend/          # API Express + Prisma (product, likes, cart)
+├── backend/          # API Express + Prisma (product, likes, cart, checkout)
 ├── frontend/         # Web React + Vite (Plush Haven)
 ├── docker-compose.yml   # PostgreSQL (chạy ở port 5433)
 └── README.md         # File này
 ```
 
-- **Backend** gồm 2 server chạy riêng:
+- **Backend** gồm 3 server chạy riêng:
   - **API chính** (product + likes): port **3000**
   - **Cart API**: port **3001**
-- **Frontend** (Vite): port **5173** — proxy `/api` và `/api/cart` tới 3000 và 3001.
+  - **Checkout API**: port **3002**
+- **Frontend** (Vite): port **5173** — proxy `/api`, `/api/cart`, `/api/checkout` tới 3000, 3001, 3002.
 
 ---
 
@@ -90,6 +91,7 @@ CART_PORT=3001
 DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/retail_store"
 PORT=3000
 CART_PORT=3001
+CHECKOUT_PORT=3002
 ```
 
 ### 5. Tạo bảng trong database (migration)
@@ -126,7 +128,7 @@ npm install
 
 ## Chạy project (mỗi lần làm việc)
 
-Cần **3 terminal** (hoặc 2 nếu gộp backend + cart sau này).
+Cần **4 terminal** (backend, cart, checkout, frontend).
 
 ### Terminal 1 — PostgreSQL (nếu dùng Docker)
 
@@ -157,7 +159,16 @@ npm run dev:cart
 
 - Cart API chạy tại **http://localhost:3001**.
 
-### Terminal 4 — Frontend
+### Terminal 4 — Checkout API
+
+```bash
+cd backend
+npm run dev:checkout
+```
+
+- Checkout API chạy tại **http://localhost:3002**.
+
+### Terminal 5 — Frontend
 
 ```bash
 cd frontend
@@ -175,9 +186,10 @@ npm run dev
 | Frontend (web)    | http://localhost:5173 |
 | API product/likes | http://localhost:3000/api |
 | Cart API         | http://localhost:3001/api |
+| Checkout API     | http://localhost:3002/api |
 | PostgreSQL (Docker) | localhost:5433 (trong container là 5432) |
 
-Frontend đã cấu hình proxy: request tới `/api` và `/api/cart` sẽ được chuyển tới đúng backend, không cần gõ port khi gọi từ code frontend.
+Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checkout` sẽ được chuyển tới đúng backend, không cần gõ port khi gọi từ code frontend.
 
 ---
 
@@ -189,6 +201,7 @@ Frontend đã cấu hình proxy: request tới `/api` và `/api/cart` sẽ đư�
 | Tắt PostgreSQL (Docker) | Ở root: `docker compose down` |
 | Chạy API product + likes | Trong `backend/`: `npm run dev` |
 | Chạy Cart API | Trong `backend/`: `npm run dev:cart` |
+| Chạy Checkout API | Trong `backend/`: `npm run dev:checkout` |
 | Chạy frontend | Trong `frontend/`: `npm run dev` |
 | Tạo/sửa bảng DB | Trong `backend/`: `npx prisma migrate dev --name <tên>` |
 | Seed lại dữ liệu | Trong `backend/`: `npx prisma db seed` |
@@ -208,11 +221,14 @@ Frontend đã cấu hình proxy: request tới `/api` và `/api/cart` sẽ đư�
   Chạy migration trước: `npx prisma migrate dev --name init`, rồi mới chạy `npx prisma db seed`.
 
 - **Frontend gọi API bị 404 / CORS**  
-  - Backend (port 3000) và Cart (port 3001) phải đang chạy.  
+  - Backend (port 3000), Cart (port 3001) và Checkout (port 3002) phải đang chạy.  
   - Mở đúng URL frontend: **http://localhost:5173** (Vite proxy chỉ hoạt động khi truy cập qua dev server).
 
 - **Cart 404 khi thêm vào giỏ**  
   Cart chạy riêng: cần chạy `npm run dev:cart` trong `backend/` (terminal thứ 3).
+
+- **Checkout 404 khi thanh toán**  
+  Checkout chạy riêng: cần chạy `npm run dev:checkout` trong `backend/` (terminal thứ 4).
 
 ---
 

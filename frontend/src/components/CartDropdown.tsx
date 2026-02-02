@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useCart } from "../cart/CartContext";
 import { CartIcon } from "./CartIcon";
 import "./CartDropdown.css";
@@ -121,10 +122,19 @@ export function CartDropdown({
           </div>
           {items.length > 0 && (
             <div className="app__cart-dropdown-footer">
-              <span className="app__cart-total-label">Tổng:</span>
-              <span className="app__cart-total-value">
-                {formatPrice(total, currency)}
-              </span>
+              <div className="app__cart-dropdown-total-row">
+                <span className="app__cart-total-label">Tổng:</span>
+                <span className="app__cart-total-value">
+                  {formatPrice(total, currency)}
+                </span>
+              </div>
+              <Link
+                to="/checkout"
+                className="app__cart-checkout-link"
+                onClick={onClose}
+              >
+                Thanh toán
+              </Link>
             </div>
           )}
         </div>
