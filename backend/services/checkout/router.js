@@ -1,9 +1,23 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const router = express.Router();
 const SESSION_HEADER = "x-cart-session";
+const JWT_SECRET = process.env.JWT_SECRET || "change-me-in-production";
+
+function getUserIdFromRequest(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+  const token = authHeader.slice(7);
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    return payload.id ?? null;
+  } catch {
+    return null;
+  }
+}
 
 const cartInclude = {
   items: { include: { product: true } },
@@ -89,11 +103,13 @@ router.post("/checkout", async (req, res) => {
       0
     );
     const currency = cart.items[0]?.product?.currency ?? "VND";
+    const userId = getUserIdFromRequest(req);
 
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
         data: {
           sessionId,
+          userId: userId || undefined,
           total,
           currency,
           paymentMethod: String(paymentMethod),

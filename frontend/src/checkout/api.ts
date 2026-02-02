@@ -1,3 +1,4 @@
+import { getStoredToken } from "../auth/api";
 import { getStoredSessionId } from "../cart/api";
 import type {
   CheckoutPreviewResponse,
@@ -8,10 +9,14 @@ import type {
 const API_BASE = "/api";
 const SESSION_HEADER = "x-cart-session";
 
-function headers(): HeadersInit {
+function headers(withAuth = false): HeadersInit {
   const h: Record<string, string> = { "Content-Type": "application/json" };
   const sessionId = getStoredSessionId();
   if (sessionId) h[SESSION_HEADER] = sessionId;
+  if (withAuth) {
+    const token = getStoredToken();
+    if (token) h["Authorization"] = `Bearer ${token}`;
+  }
   return h;
 }
 
@@ -22,13 +27,13 @@ export async function fetchCheckoutPreview(): Promise<CheckoutPreviewResponse> {
   return res.json();
 }
 
-/** POST /api/checkout — gửi form thanh toán giả lập */
+/** POST /api/checkout — gửi form thanh toán giả lập (gửi token nếu đã login để gắn đơn vào user) */
 export async function submitCheckout(
   payload: CheckoutPayload
 ): Promise<CheckoutResponse> {
   const res = await fetch(`${API_BASE}/checkout`, {
     method: "POST",
-    headers: headers(),
+    headers: headers(true),
     body: JSON.stringify(payload),
   });
   const data = await res.json();

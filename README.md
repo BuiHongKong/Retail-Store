@@ -22,11 +22,13 @@ Retail-Store/
 └── README.md         # File này
 ```
 
-- **Backend** gồm 3 server chạy riêng:
+- **Backend** gồm 4 server chạy riêng:
   - **API chính** (product + likes): port **3000**
   - **Cart API**: port **3001**
   - **Checkout API**: port **3002**
-- **Frontend** (Vite): port **5173** — proxy `/api`, `/api/cart`, `/api/checkout` tới 3000, 3001, 3002.
+  - **Auth API**: port **3003** (tùy chọn — khi bật thì phải đăng nhập mới vào shop)
+- **Frontend** (Vite): port **5173** — proxy `/api`, `/api/cart`, `/api/checkout`, `/api/auth`, `/api/orders` tới 3000–3003.
+- **User mặc định** (khi bật Auth): `demo@example.com` / `demo123` (tạo khi chạy seed).
 
 ---
 
@@ -83,6 +85,9 @@ Trong thư mục `backend/`, tạo file `.env` với nội dung:
 DATABASE_URL="postgresql://postgres:postgres@localhost:5433/retail_store"
 PORT=3000
 CART_PORT=3001
+CHECKOUT_PORT=3002
+AUTH_PORT=3003
+JWT_SECRET=your-secret-change-in-production
 ```
 
 **Nếu dùng PostgreSQL cài sẵn (bước 2B):** sửa `DATABASE_URL` cho đúng user, password và port (thường 5432):
@@ -92,6 +97,8 @@ DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/retail_store"
 PORT=3000
 CART_PORT=3001
 CHECKOUT_PORT=3002
+AUTH_PORT=3003
+JWT_SECRET=your-secret-change-in-production
 ```
 
 ### 5. Tạo bảng trong database (migration)
@@ -113,7 +120,7 @@ Trong `backend/`:
 npx prisma db seed
 ```
 
-- Tạo 3 category và 9 sản phẩm mẫu (đọc từ `data/seed/products.json`).
+- Tạo 3 category, 9 sản phẩm mẫu và **user mặc định** `demo@example.com` / `demo123` (để dùng thử khi bật Auth service).
 
 ### 7. Cài dependency frontend
 
@@ -168,7 +175,19 @@ npm run dev:checkout
 
 - Checkout API chạy tại **http://localhost:3002**.
 
-### Terminal 5 — Frontend
+### Terminal 5 — Auth API (tùy chọn)
+
+- **Không bật:** App chạy bình thường, không cần đăng nhập.
+- **Bật:** Phải đăng nhập mới vào shop. Dùng user mặc định: **demo@example.com** / **demo123**.
+
+```bash
+cd backend
+npm run dev:auth
+```
+
+- Auth API chạy tại **http://localhost:3003**.
+
+### Terminal 6 — Frontend
 
 ```bash
 cd frontend
@@ -187,9 +206,10 @@ npm run dev
 | API product/likes | http://localhost:3000/api |
 | Cart API         | http://localhost:3001/api |
 | Checkout API     | http://localhost:3002/api |
+| Auth API         | http://localhost:3003/api (tùy chọn) |
 | PostgreSQL (Docker) | localhost:5433 (trong container là 5432) |
 
-Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checkout` sẽ được chuyển tới đúng backend, không cần gõ port khi gọi từ code frontend.
+Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checkout`, `/api/auth`, `/api/orders` sẽ được chuyển tới đúng backend.
 
 ---
 
@@ -202,6 +222,7 @@ Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checko
 | Chạy API product + likes | Trong `backend/`: `npm run dev` |
 | Chạy Cart API | Trong `backend/`: `npm run dev:cart` |
 | Chạy Checkout API | Trong `backend/`: `npm run dev:checkout` |
+| Chạy Auth API (bắt buộc đăng nhập) | Trong `backend/`: `npm run dev:auth` |
 | Chạy frontend | Trong `frontend/`: `npm run dev` |
 | Tạo/sửa bảng DB | Trong `backend/`: `npx prisma migrate dev --name <tên>` |
 | Seed lại dữ liệu | Trong `backend/`: `npx prisma db seed` |
@@ -229,6 +250,9 @@ Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checko
 
 - **Checkout 404 khi thanh toán**  
   Checkout chạy riêng: cần chạy `npm run dev:checkout` trong `backend/` (terminal thứ 4).
+
+- **Bật Auth (bắt buộc đăng nhập)**  
+  Chạy `npm run dev:auth` trong `backend/`. Đăng nhập bằng **demo@example.com** / **demo123** (user tạo khi seed). Khi tắt Auth service, app lại vào shop không cần đăng nhập.
 
 ---
 

@@ -75,9 +75,22 @@ model CartItem {
   @@map("cart_items")
 }
 
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  orders       Order[]
+
+  @@map("users")
+}
+
 model Order {
   id              String      @id @default(uuid())
   sessionId       String      @map("session_id")
+  userId          String?     @map("user_id")
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   total           Int         // tổng tiền tại thời điểm đặt (đơn vị nhỏ nhất, e.g. VND)
   currency        String      @default("VND")
   paymentMethod   String      @map("payment_method") // "card", "cod", ...

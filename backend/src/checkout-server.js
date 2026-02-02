@@ -17,7 +17,7 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", origin || "*");
   }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-cart-session");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, x-cart-session, Authorization");
   res.setHeader("Vary", "Origin");
   if (req.method === "OPTIONS") {
     res.setHeader("Access-Control-Max-Age", "86400");
