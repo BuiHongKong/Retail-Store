@@ -64,7 +64,7 @@ export function LoginPage() {
               className="auth-page__input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="mật khẩu"
               autoComplete="current-password"
               required
             />

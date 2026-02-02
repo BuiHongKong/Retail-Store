@@ -25,6 +25,20 @@ function formatDate(iso: string): string {
   });
 }
 
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  pending: "Chờ xử lý",
+  confirmed: "Đã xác nhận",
+  shipping: "Đang giao",
+  delivered: "Đã giao",
+  cancelled: "Đã hủy",
+  completed: "Hoàn thành",
+};
+
+function getOrderStatusLabel(status: string): string {
+  const key = (status || "").toLowerCase();
+  return ORDER_STATUS_LABELS[key] ?? (status || "—");
+}
+
 export function OrdersPage() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
@@ -103,6 +117,9 @@ export function OrdersPage() {
                   <div className="orders__card-meta">
                     <span className="orders__card-id">{order.id.slice(0, 8)}…</span>
                     <span className="orders__card-date">{formatDate(order.createdAt)}</span>
+                    <span className={`orders__card-status orders__card-status--${(order.status || "pending").toLowerCase()}`}>
+                      {getOrderStatusLabel(order.status)}
+                    </span>
                   </div>
                   <span className="orders__card-total">
                     {formatPrice(order.total, order.currency)}
