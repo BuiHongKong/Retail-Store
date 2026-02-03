@@ -9,6 +9,7 @@
     "dev:cart": "node --watch src/cart-server.js",
     "dev:checkout": "node --watch src/checkout-server.js",
     "dev:auth": "node --watch src/auth-server.js",
+    "dev:admin": "node --watch src/admin-server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
@@ -27,7 +28,8 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "prisma": "^6.0.0"

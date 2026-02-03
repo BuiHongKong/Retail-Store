@@ -22,13 +22,15 @@ Retail-Store/
 └── README.md         # File này
 ```
 
-- **Backend** gồm 4 server chạy riêng:
+- **Backend** gồm 5 server chạy riêng:
   - **API chính** (product + likes): port **3000**
   - **Cart API**: port **3001**
   - **Checkout API**: port **3002**
   - **Auth API**: port **3003** (tùy chọn — khi bật thì phải đăng nhập mới vào shop)
-- **Frontend** (Vite): port **5173** — proxy `/api`, `/api/cart`, `/api/checkout`, `/api/auth`, `/api/orders` tới 3000–3003.
+  - **Admin API**: port **3004** (tùy chọn — khi bật thì có trang Admin tại `/admin`, quản lý đơn hàng, sản phẩm, danh mục)
+- **Frontend** (Vite): port **5173** — proxy `/api`, `/api/cart`, `/api/checkout`, `/api/auth`, `/api/orders`, `/api/admin`, `/uploads` tới 3000–3004.
 - **User mặc định** (khi bật Auth): `demo@example.com` / `demo123` (tạo khi chạy seed).
+- **Admin mặc định** (khi bật Admin): `admin@example.com` / `admin123` (tạo khi chạy seed).
 
 ---
 
@@ -88,6 +90,8 @@ CART_PORT=3001
 CHECKOUT_PORT=3002
 AUTH_PORT=3003
 JWT_SECRET=your-secret-change-in-production
+ADMIN_PORT=3004
+ADMIN_JWT_SECRET=admin-secret-change-in-production
 ```
 
 **Nếu dùng PostgreSQL cài sẵn (bước 2B):** sửa `DATABASE_URL` cho đúng user, password và port (thường 5432):
@@ -99,6 +103,8 @@ CART_PORT=3001
 CHECKOUT_PORT=3002
 AUTH_PORT=3003
 JWT_SECRET=your-secret-change-in-production
+ADMIN_PORT=3004
+ADMIN_JWT_SECRET=admin-secret-change-in-production
 ```
 
 ### 5. Tạo bảng trong database (migration)
@@ -187,7 +193,19 @@ npm run dev:auth
 
 - Auth API chạy tại **http://localhost:3003**.
 
-### Terminal 6 — Frontend
+### Terminal 6 — Admin API (tùy chọn)
+
+- **Không bật:** Trang `/admin` hiển thị "Admin không khả dụng".
+- **Bật:** Vào **http://localhost:5173/admin** đăng nhập Admin (quản lý đơn hàng, sản phẩm, danh mục). Tài khoản: **admin@example.com** / **admin123**.
+
+```bash
+cd backend
+npm run dev:admin
+```
+
+- Admin API chạy tại **http://localhost:3004**.
+
+### Terminal 7 — Frontend
 
 ```bash
 cd frontend
@@ -207,9 +225,10 @@ npm run dev
 | Cart API         | http://localhost:3001/api |
 | Checkout API     | http://localhost:3002/api |
 | Auth API         | http://localhost:3003/api (tùy chọn) |
+| Admin API        | http://localhost:3004/api (tùy chọn) |
 | PostgreSQL (Docker) | localhost:5433 (trong container là 5432) |
 
-Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checkout`, `/api/auth`, `/api/orders` sẽ được chuyển tới đúng backend.
+Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checkout`, `/api/auth`, `/api/orders`, `/api/admin`, `/uploads` sẽ được chuyển tới đúng backend.
 
 ---
 
@@ -223,6 +242,7 @@ Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checko
 | Chạy Cart API | Trong `backend/`: `npm run dev:cart` |
 | Chạy Checkout API | Trong `backend/`: `npm run dev:checkout` |
 | Chạy Auth API (bắt buộc đăng nhập) | Trong `backend/`: `npm run dev:auth` |
+| Chạy Admin API (trang /admin) | Trong `backend/`: `npm run dev:admin` |
 | Chạy frontend | Trong `frontend/`: `npm run dev` |
 | Tạo/sửa bảng DB | Trong `backend/`: `npx prisma migrate dev --name <tên>` |
 | Seed lại dữ liệu | Trong `backend/`: `npx prisma db seed` |
@@ -253,6 +273,9 @@ Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checko
 
 - **Bật Auth (bắt buộc đăng nhập)**  
   Chạy `npm run dev:auth` trong `backend/`. Đăng nhập bằng **demo@example.com** / **demo123** (user tạo khi seed). Khi tắt Auth service, app lại vào shop không cần đăng nhập.
+
+- **Trang Admin (/admin)**  
+  Chạy `npm run dev:admin` trong `backend/`. Mở **http://localhost:5173/admin**, đăng nhập **admin@example.com** / **admin123**. Khi tắt Admin service, trang /admin hiển thị "Admin không khả dụng".
 
 ---
 

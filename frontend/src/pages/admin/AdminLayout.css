@@ -1,0 +1,123 @@
+.admin-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-layout__loading,
+.admin-layout__unavailable {
+  margin: auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.admin-layout__unavailable h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
+.admin-layout__unavailable p {
+  margin: 0 0 1rem;
+  color: var(--text-soft);
+}
+
+.admin-layout__unavailable code {
+  background: var(--surface);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.admin-layout__unavailable a {
+  font-weight: 600;
+  color: var(--accent-teal);
+}
+
+.admin-layout:has(.admin-sidebar) {
+  flex-direction: row;
+}
+
+.admin-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border-soft);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-sidebar__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.admin-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-sidebar__link {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-sidebar__link:hover {
+  background: rgba(var(--accent-teal-rgb), 0.08);
+  color: var(--text);
+}
+
+.admin-sidebar__link--active {
+  background: rgba(var(--accent-teal-rgb), 0.12);
+  color: var(--accent-teal);
+}
+
+.admin-sidebar__user {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-sidebar__user span {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-sidebar__logout {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  background: transparent;
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-sidebar__logout:hover {
+  background: rgba(var(--accent-coral-rgb), 0.1);
+  color: var(--accent-coral);
+  border-color: var(--accent-coral);
+}
+
+.admin-main {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  overflow: auto;
+}

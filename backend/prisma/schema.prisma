@@ -80,6 +80,7 @@ model User {
   email        String    @unique
   passwordHash String    @map("password_hash")
   name         String?
+  role         String    @default("user") // "user" | "admin"
   createdAt    DateTime  @default(now()) @map("created_at")
   orders       Order[]
 

@@ -6,6 +6,8 @@ const fs = require("fs");
 const prisma = new PrismaClient();
 const DEFAULT_USER_EMAIL = "demo@example.com";
 const DEFAULT_USER_PASSWORD = "demo123";
+const ADMIN_EMAIL = "admin@example.com";
+const ADMIN_PASSWORD = "admin123";
 const SALT_ROUNDS = 10;
 
 const categoriesSeed = [
@@ -61,12 +63,28 @@ async function main() {
         email: DEFAULT_USER_EMAIL,
         passwordHash,
         name: "Demo User",
+        role: "user",
       },
     });
     console.log(`User mặc định đã tạo: ${DEFAULT_USER_EMAIL} / ${DEFAULT_USER_PASSWORD}`);
   }
 
-  console.log("Seed done: categories + products (+ user mặc định nếu chưa có)");
+  // Admin mặc định (khi bật admin service)
+  const existingAdmin = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } });
+  if (!existingAdmin) {
+    const adminHash = await bcrypt.hash(ADMIN_PASSWORD, SALT_ROUNDS);
+    await prisma.user.create({
+      data: {
+        email: ADMIN_EMAIL,
+        passwordHash: adminHash,
+        name: "Admin",
+        role: "admin",
+      },
+    });
+    console.log(`Admin mặc định đã tạo: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+  }
+
+  console.log("Seed done: categories + products (+ user + admin mặc định nếu chưa có)");
 }
 
 main()

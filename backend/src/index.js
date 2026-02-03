@@ -31,6 +31,10 @@ app.use((req, res, next) => {
 const assetsPath = path.join(__dirname, "..", "assets");
 app.use("/assets", express.static(assetsPath));
 
+// Ảnh upload từ admin (admin-server lưu vào backend/uploads)
+const uploadsPath = path.join(__dirname, "..", "uploads");
+app.use("/uploads", express.static(uploadsPath));
+
 // API product + likes (Prisma + PostgreSQL). Cart, Checkout, Auth chạy service riêng (dev:cart, dev:checkout, dev:auth).
 app.use("/api", productRouter);
 
