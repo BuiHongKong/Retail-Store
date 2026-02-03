@@ -4,10 +4,12 @@ import {
   getAdminCategories,
   createProduct,
   updateProduct,
+  deleteProduct,
   uploadImage,
   type AdminProduct,
   type AdminCategory,
 } from "../../admin/api";
+import { useAdminNotification } from "../../admin/AdminNotificationContext";
 import "./AdminProducts.css";
 
 function formatPrice(price: number, currency: string): string {
@@ -31,6 +33,7 @@ const defaultForm = {
 };
 
 export function AdminProductsPage() {
+  const { showToast, showConfirm } = useAdminNotification();
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +44,7 @@ export function AdminProductsPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = () => {
     Promise.all([getAdminProducts(), getAdminCategories()])
@@ -61,6 +65,20 @@ export function AdminProductsPage() {
     setEditingId(null);
     setShowForm(false);
     setSubmitError(null);
+  };
+
+  const handleDelete = (p: AdminProduct) => {
+    showConfirm(`Xóa sản phẩm "${p.name}"?`, async () => {
+      setDeletingId(p.id);
+      try {
+        await deleteProduct(p.id);
+        load();
+      } catch (e) {
+        showToast(e instanceof Error ? e.message : "Xóa thất bại", "error");
+      } finally {
+        setDeletingId(null);
+      }
+    });
   };
 
   const handleEdit = (p: AdminProduct) => {
@@ -238,7 +256,18 @@ export function AdminProductsPage() {
                   <td>{p.name}</td>
                   <td>{formatPrice(p.price, p.currency)}</td>
                   <td>{p.stock}</td>
-                  <td><button type="button" className="admin-products__edit-btn" onClick={() => handleEdit(p)}>Sửa</button></td>
+                  <td>
+                    <button type="button" className="admin-products__edit-btn" onClick={() => handleEdit(p)}>Sửa</button>
+                    {" "}
+                    <button
+                      type="button"
+                      className="admin-products__delete-btn"
+                      onClick={() => handleDelete(p)}
+                      disabled={deletingId === p.id}
+                    >
+                      {deletingId === p.id ? "Đang xóa..." : "Xóa"}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

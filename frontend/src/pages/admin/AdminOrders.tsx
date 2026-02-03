@@ -4,6 +4,7 @@ import {
   updateOrderStatus,
   type AdminOrder,
 } from "../../admin/api";
+import { useAdminNotification } from "../../admin/AdminNotificationContext";
 import "./AdminOrders.css";
 
 const STATUS_OPTIONS = [
@@ -58,10 +59,14 @@ export function AdminOrdersPage() {
   const handleStatusChange = async (orderId: string, status: string) => {
     setUpdatingId(orderId);
     try {
-      const updated = await updateOrderStatus(orderId, status);
-      setOrders((prev) => prev.map((o) => (o.id === orderId ? updated : o)));
+      const result = await updateOrderStatus(orderId, status);
+      if ("deleted" in result && result.deleted) {
+        setOrders((prev) => prev.filter((o) => o.id !== result.id));
+      } else {
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? result : o)));
+      }
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Cập nhật thất bại");
+      showToast(e instanceof Error ? e.message : "Cập nhật thất bại", "error");
     } finally {
       setUpdatingId(null);
     }
@@ -95,6 +100,9 @@ export function AdminOrdersPage() {
               <tr>
                 <th>Mã</th>
                 <th>Ngày</th>
+                <th>SĐT</th>
+                <th>Địa chỉ giao hàng</th>
+                <th>PT thanh toán</th>
                 <th>Tổng</th>
                 <th>Trạng thái</th>
               </tr>
@@ -104,6 +112,11 @@ export function AdminOrdersPage() {
                 <tr key={order.id}>
                   <td className="admin-orders__id">{order.id.slice(0, 8)}…</td>
                   <td>{formatDate(order.createdAt)}</td>
+                  <td>{order.phone ?? "—"}</td>
+                  <td className="admin-orders__address" title={order.shippingAddress ?? undefined}>
+                    {order.shippingAddress ? (order.shippingAddress.length > 40 ? `${order.shippingAddress.slice(0, 40)}…` : order.shippingAddress) : "—"}
+                  </td>
+                  <td>{order.paymentMethod === "card" ? "Thẻ" : order.paymentMethod === "cod" ? "COD" : order.paymentMethod}</td>
                   <td>{formatPrice(order.total, order.currency)}</td>
                   <td>
                     <select

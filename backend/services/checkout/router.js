@@ -77,8 +77,14 @@ router.post("/checkout", async (req, res) => {
 
     const body = req.body || {};
     const paymentMethod = body.paymentMethod ?? "cod";
-    const shippingAddress = body.shippingAddress ?? null;
-    const phone = body.phone ?? null;
+    const shippingAddress = body.shippingAddress != null ? String(body.shippingAddress).trim() : "";
+    const phone = body.phone != null ? String(body.phone).trim() : "";
+    if (!shippingAddress) {
+      return res.status(400).json({ error: "Địa chỉ giao hàng là bắt buộc" });
+    }
+    if (!phone) {
+      return res.status(400).json({ error: "Số điện thoại là bắt buộc" });
+    }
     // Form giả lập: không gọi payment thật, chỉ validate có cart và items
     if (paymentMethod === "card") {
       if (!body.cardHolder || typeof body.cardHolder !== "string" || body.cardHolder.trim() === "") {
@@ -113,9 +119,9 @@ router.post("/checkout", async (req, res) => {
           total,
           currency,
           paymentMethod: String(paymentMethod),
-          shippingAddress: shippingAddress ? String(shippingAddress).trim() || null : null,
-          phone: phone ? String(phone).trim() || null : null,
-          status: "completed",
+          shippingAddress,
+          phone,
+          status: "pending",
         },
       });
       await tx.orderItem.createMany({

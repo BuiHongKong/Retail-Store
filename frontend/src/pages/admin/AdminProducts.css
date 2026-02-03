@@ -190,3 +190,24 @@
 .admin-products__edit-btn:hover {
   background: rgba(var(--accent-teal-rgb), 0.1);
 }
+
+.admin-products__delete-btn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c53030;
+  background: transparent;
+  border: 1px solid #c53030;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-products__delete-btn:hover:not(:disabled) {
+  background: rgba(197, 48, 48, 0.1);
+}
+
+.admin-products__delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -59,6 +59,9 @@ export interface AdminOrder {
   currency: string;
   status: string;
   createdAt: string;
+  shippingAddress: string | null;
+  phone: string | null;
+  paymentMethod: string;
   items: AdminOrderItem[];
 }
 
@@ -76,7 +79,12 @@ export async function getAdminOrders(params?: { limit?: number; offset?: number 
   return data;
 }
 
-export async function updateOrderStatus(orderId: string, status: string): Promise<AdminOrder> {
+export type UpdateOrderStatusResult = AdminOrder | { deleted: true; id: string };
+
+export async function updateOrderStatus(
+  orderId: string,
+  status: string
+): Promise<UpdateOrderStatusResult> {
   const res = await fetch(`${API_BASE}/admin/orders/${orderId}`, {
     method: "PATCH",
     headers: adminHeaders(),
@@ -208,6 +216,21 @@ export async function updateProduct(
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to update product");
   return data;
+}
+
+export async function deleteProduct(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/admin/products/${id}`, {
+    method: "DELETE",
+    headers: adminHeaders(),
+  });
+  if (res.status === 401) {
+    clearAdminToken();
+    throw new Error("Unauthorized");
+  }
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to delete product");
+  }
 }
 
 export async function uploadImage(file: File): Promise<{ url: string }> {

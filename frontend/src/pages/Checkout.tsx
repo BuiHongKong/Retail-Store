@@ -63,6 +63,14 @@ export function CheckoutPage() {
       setSubmitError("Giỏ hàng trống.");
       return;
     }
+    if (!shippingAddress.trim()) {
+      setSubmitError("Vui lòng nhập địa chỉ giao hàng.");
+      return;
+    }
+    if (!phone.trim()) {
+      setSubmitError("Vui lòng nhập số điện thoại.");
+      return;
+    }
     if (paymentMethod === "card" && !cardHolder.trim()) {
       setSubmitError("Vui lòng nhập tên chủ thẻ.");
       return;
@@ -71,8 +79,8 @@ export function CheckoutPage() {
     try {
       const payload: CheckoutPayload = {
         paymentMethod,
-        shippingAddress: shippingAddress.trim() || undefined,
-        phone: phone.trim() || undefined,
+        shippingAddress: shippingAddress.trim(),
+        phone: phone.trim(),
       };
       if (paymentMethod === "card") {
         payload.cardHolder = cardHolder.trim();
@@ -215,7 +223,7 @@ export function CheckoutPage() {
 
           <div className="checkout__field">
             <label className="checkout__label" htmlFor="phone">
-              Số điện thoại
+              Số điện thoại <span className="checkout__required">*</span>
             </label>
             <input
               id="phone"
@@ -224,6 +232,7 @@ export function CheckoutPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="0912345678"
+              required
             />
           </div>
 

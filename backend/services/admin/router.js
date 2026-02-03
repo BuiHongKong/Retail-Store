@@ -103,7 +103,7 @@ router.get("/admin/orders", adminMiddleware, async (req, res) => {
   }
 });
 
-/** PATCH /admin/orders/:id — cập nhật trạng thái */
+/** PATCH /admin/orders/:id — cập nhật trạng thái. Hoàn thành → xóa đơn (clear lịch sử khách) */
 router.patch("/admin/orders/:id", adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
@@ -114,6 +114,10 @@ router.patch("/admin/orders/:id", adminMiddleware, async (req, res) => {
     const normalized = status.toLowerCase().trim();
     if (!ORDER_STATUSES.includes(normalized)) {
       return res.status(400).json({ error: "Invalid status", allowed: ORDER_STATUSES });
+    }
+    if (normalized === "completed") {
+      await prisma.order.delete({ where: { id } });
+      return res.json({ deleted: true, id });
     }
     const order = await prisma.order.update({
       where: { id },
@@ -279,6 +283,22 @@ router.patch("/admin/products/:id", adminMiddleware, async (req, res) => {
     if (err.code === "P2002") return res.status(409).json({ error: "Slug already exists" });
     console.error(err);
     res.status(500).json({ error: "Failed to update product" });
+  }
+});
+
+/** DELETE /admin/products/:id */
+router.delete("/admin/products/:id", adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.product.delete({
+      where: { id },
+    });
+    res.status(204).send();
+  } catch (err) {
+    if (err.code === "P2025") return res.status(404).json({ error: "Product not found" });
+    if (err.code === "P2003") return res.status(409).json({ error: "Không thể xóa: sản phẩm đã có trong đơn hàng" });
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete product" });
   }
 });
 

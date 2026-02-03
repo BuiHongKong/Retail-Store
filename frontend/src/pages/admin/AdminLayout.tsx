@@ -1,5 +1,6 @@
 import { Navigate, Outlet, Link, useLocation } from "react-router-dom";
 import { useAdmin } from "../../admin/AdminContext";
+import { AdminNotificationProvider } from "../../admin/AdminNotificationContext";
 import "./AdminLayout.css";
 
 export function AdminLayout() {
@@ -36,39 +37,41 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <h2 className="admin-sidebar__title">Admin</h2>
-        <nav className="admin-sidebar__nav">
-          <Link
-            to="/admin"
-            className={location.pathname === "/admin" ? "admin-sidebar__link admin-sidebar__link--active" : "admin-sidebar__link"}
-          >
-            Đơn hàng
-          </Link>
-          <Link
-            to="/admin/products"
-            className={location.pathname.startsWith("/admin/products") ? "admin-sidebar__link admin-sidebar__link--active" : "admin-sidebar__link"}
-          >
-            Sản phẩm
-          </Link>
-          <Link
-            to="/admin/categories"
-            className={location.pathname.startsWith("/admin/categories") ? "admin-sidebar__link admin-sidebar__link--active" : "admin-sidebar__link"}
-          >
-            Danh mục
-          </Link>
-        </nav>
-        <div className="admin-sidebar__user">
-          <span>{adminUser?.email}</span>
-          <button type="button" className="admin-sidebar__logout" onClick={() => logout()}>
-            Đăng xuất
-          </button>
-        </div>
-      </aside>
-      <main className="admin-main">
-        <Outlet />
-      </main>
-    </div>
+    <AdminNotificationProvider>
+      <div className="admin-layout">
+        <aside className="admin-sidebar">
+          <h2 className="admin-sidebar__title">Admin</h2>
+          <nav className="admin-sidebar__nav">
+            <Link
+              to="/admin"
+              className={location.pathname === "/admin" ? "admin-sidebar__link admin-sidebar__link--active" : "admin-sidebar__link"}
+            >
+              Đơn hàng
+            </Link>
+            <Link
+              to="/admin/products"
+              className={location.pathname.startsWith("/admin/products") ? "admin-sidebar__link admin-sidebar__link--active" : "admin-sidebar__link"}
+            >
+              Sản phẩm
+            </Link>
+            <Link
+              to="/admin/categories"
+              className={location.pathname.startsWith("/admin/categories") ? "admin-sidebar__link admin-sidebar__link--active" : "admin-sidebar__link"}
+            >
+              Danh mục
+            </Link>
+          </nav>
+          <div className="admin-sidebar__user">
+            <span>{adminUser?.email}</span>
+            <button type="button" className="admin-sidebar__logout" onClick={() => logout()}>
+              Đăng xuất
+            </button>
+          </div>
+        </aside>
+        <main className="admin-main">
+          <Outlet />
+        </main>
+      </div>
+    </AdminNotificationProvider>
   );
 }
