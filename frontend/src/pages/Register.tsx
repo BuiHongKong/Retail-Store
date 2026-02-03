@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import "./Login.css";
 
 export function RegisterPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
@@ -16,11 +18,11 @@ export function RegisterPage() {
     e.preventDefault();
     setError(null);
     if (!email.trim() || !password) {
-      setError("Vui lòng nhập email và mật khẩu.");
+      setError(t("store.auth.emailPasswordRequired"));
       return;
     }
     if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự.");
+      setError(t("store.auth.passwordMinLength"));
       return;
     }
     setSubmitting(true);
@@ -28,7 +30,7 @@ export function RegisterPage() {
       await register(email.trim(), password, name.trim() || undefined);
       navigate("/", { replace: true });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Đăng ký thất bại");
+      setError(e instanceof Error ? e.message : t("store.auth.registerError"));
     } finally {
       setSubmitting(false);
     }
@@ -42,10 +44,10 @@ export function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-page__card">
-        <h1 className="auth-page__title">Đăng ký</h1>
+        <h1 className="auth-page__title">{t("store.auth.registerTitle")}</h1>
         <form className="auth-page__form" onSubmit={handleSubmit}>
           <div className="auth-page__field">
-            <label className="auth-page__label" htmlFor="register-email">Email</label>
+            <label className="auth-page__label" htmlFor="register-email">{t("store.auth.email")}</label>
             <input
               id="register-email"
               type="email"
@@ -59,7 +61,7 @@ export function RegisterPage() {
           </div>
           <div className="auth-page__field">
             <label className="auth-page__label" htmlFor="register-password">
-              Mật khẩu (ít nhất 6 ký tự)
+              {t("store.auth.passwordHint")}
             </label>
             <input
               id="register-password"
@@ -74,7 +76,7 @@ export function RegisterPage() {
             />
           </div>
           <div className="auth-page__field">
-            <label className="auth-page__label" htmlFor="register-name">Tên (tùy chọn)</label>
+            <label className="auth-page__label" htmlFor="register-name">{t("store.auth.nameOptional")}</label>
             <input
               id="register-name"
               type="text"
@@ -87,11 +89,11 @@ export function RegisterPage() {
           </div>
           {error && <p className="auth-page__error" role="alert">{error}</p>}
           <button type="submit" className="auth-page__submit" disabled={submitting}>
-            {submitting ? "Đang xử lý..." : "Đăng ký"}
+            {submitting ? t("store.auth.processing") : t("store.auth.register")}
           </button>
         </form>
         <p className="auth-page__footer">
-          Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+          {t("store.auth.hasAccount")} <Link to="/login">{t("store.auth.login")}</Link>
         </p>
       </div>
     </div>

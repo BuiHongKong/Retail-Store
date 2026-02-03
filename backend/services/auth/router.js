@@ -32,8 +32,15 @@ function authMiddleware(req, res, next) {
   }
 }
 
+const ALLOWED_LOCALES = ["vi", "en"];
+
 function toUserResponse(user) {
-  return { id: user.id, email: user.email, name: user.name ?? null };
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name ?? null,
+    preferredLocale: user.preferredLocale ?? null,
+  };
 }
 
 /** GET /auth/status — frontend gọi để biết auth service đang chạy (bật bắt buộc đăng nhập) */
@@ -109,6 +116,35 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to get user" });
+  }
+});
+
+/** PATCH /auth/me — update profile (e.g. preferredLocale) */
+router.patch("/auth/me", authMiddleware, async (req, res) => {
+  try {
+    const body = req.body || {};
+    const data = {};
+    if (body.preferredLocale !== undefined) {
+      const locale = typeof body.preferredLocale === "string" ? body.preferredLocale.trim().toLowerCase() : "";
+      if (locale && !ALLOWED_LOCALES.includes(locale)) {
+        return res.status(400).json({ error: "preferredLocale must be vi or en" });
+      }
+      data.preferredLocale = locale || null;
+    }
+    if (Object.keys(data).length === 0) {
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+      if (!user) return res.status(404).json({ error: "User not found" });
+      return res.json(toUserResponse(user));
+    }
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data,
+    });
+    res.json(toUserResponse(user));
+  } catch (err) {
+    if (err.code === "P2025") return res.status(404).json({ error: "User not found" });
+    console.error(err);
+    res.status(500).json({ error: "Failed to update user" });
   }
 });
 

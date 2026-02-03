@@ -1,11 +1,12 @@
+import { useTranslation } from "react-i18next";
 import { useLikes } from "../likes/LikesContext";
 import type { Product } from "../product/types";
 import { HeartIcon } from "./HeartIcon";
 import "./LikesDropdown.css";
 
-function formatPrice(price: number, currency: string): string {
+function formatPrice(price: number, currency: string, locale: string): string {
   if (currency === "VND") {
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(price);
@@ -27,8 +28,10 @@ export function LikesDropdown({
   triggerRef,
   dropdownRef,
 }: LikesDropdownProps) {
+  const { t, i18n } = useTranslation();
   const { items, loading, removeLike, clearAll } = useLikes();
   const hasItems = items.length > 0;
+  const locale = i18n.language === "en" ? "en" : "vi";
 
   return (
     <div className="app__likes-wrap" ref={dropdownRef}>
@@ -37,7 +40,7 @@ export function LikesDropdown({
         className={`app__likes-trigger ${hasItems ? "app__likes-trigger--active" : ""}`}
         ref={triggerRef}
         onClick={onToggle}
-        aria-label="Sản phẩm đã thích"
+        aria-label={t("store.likes.ariaLikes")}
         aria-expanded={isOpen}
       >
         <HeartIcon filled={hasItems} />
@@ -48,25 +51,25 @@ export function LikesDropdown({
         )}
       </button>
       {isOpen && (
-        <div className="app__likes-dropdown" role="dialog" aria-label="Sản phẩm đã thích">
+        <div className="app__likes-dropdown" role="dialog" aria-label={t("store.likes.ariaLikes")}>
           <div className="app__likes-dropdown-header">
-            <span className="app__likes-dropdown-title">Đã thích</span>
+            <span className="app__likes-dropdown-title">{t("store.likes.title")}</span>
             {hasItems && (
               <button
                 type="button"
                 className="app__likes-clear-all"
                 onClick={() => clearAll()}
-                aria-label="Xóa toàn bộ đã thích"
+                aria-label={t("store.likes.clearAll")}
               >
-                Clear all
+                {t("common.clearAll")}
               </button>
             )}
           </div>
           <div className="app__likes-dropdown-body">
             {loading ? (
-              <p className="app__likes-empty">Đang tải...</p>
+              <p className="app__likes-empty">{t("common.loading")}</p>
             ) : items.length === 0 ? (
-              <p className="app__likes-empty">Chưa có sản phẩm nào</p>
+              <p className="app__likes-empty">{t("store.likes.empty")}</p>
             ) : (
               <ul className="app__likes-list">
                 {items.map((item: Product) => (
@@ -81,14 +84,14 @@ export function LikesDropdown({
                     <div className="app__likes-item-info">
                       <span className="app__likes-item-name">{item.name}</span>
                       <span className="app__likes-item-price">
-                        {formatPrice(item.price, item.currency)}
+                        {formatPrice(item.price, item.currency, locale)}
                       </span>
                     </div>
                     <button
                       type="button"
                       className="app__likes-item-remove"
                       onClick={() => removeLike(item.id)}
-                      aria-label="Bỏ thích"
+                      aria-label={t("store.likes.removeLike")}
                     >
                       ×
                     </button>

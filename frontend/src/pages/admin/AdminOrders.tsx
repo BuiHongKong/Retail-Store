@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getAdminOrders,
   updateOrderStatus,
@@ -7,24 +8,17 @@ import {
 import { useAdminNotification } from "../../admin/AdminNotificationContext";
 import "./AdminOrders.css";
 
-const STATUS_OPTIONS = [
-  { value: "pending", label: "Chờ xử lý" },
-  { value: "confirmed", label: "Đã xác nhận" },
-  { value: "shipping", label: "Đang giao" },
-  { value: "delivered", label: "Đã giao" },
-  { value: "completed", label: "Hoàn thành" },
-  { value: "cancelled", label: "Đã hủy" },
-];
+const STATUS_VALUES = ["pending", "confirmed", "shipping", "delivered", "completed", "cancelled"] as const;
 
-function formatPrice(price: number, currency: string): string {
+function formatPrice(price: number, currency: string, locale: string): string {
   if (currency === "VND") {
-    return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
+    return new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", { style: "currency", currency: "VND" }).format(price);
   }
   return `${currency} ${price}`;
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("vi-VN", {
+function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "vi-VN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -34,6 +28,9 @@ function formatDate(iso: string): string {
 }
 
 export function AdminOrdersPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "en" ? "en" : "vi";
+  const { showToast } = useAdminNotification();
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +43,7 @@ export function AdminOrdersPage() {
         if (!cancelled) setOrders(data);
       })
       .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Lỗi tải đơn hàng");
+        if (!cancelled) setError(e instanceof Error ? e.message : t("admin.orders.loadError"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -54,7 +51,7 @@ export function AdminOrdersPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const handleStatusChange = async (orderId: string, status: string) => {
     setUpdatingId(orderId);
@@ -66,7 +63,7 @@ export function AdminOrdersPage() {
         setOrders((prev) => prev.map((o) => (o.id === orderId ? result : o)));
       }
     } catch (e) {
-      showToast(e instanceof Error ? e.message : "Cập nhật thất bại", "error");
+      showToast(e instanceof Error ? e.message : t("admin.orders.updateError"), "error");
     } finally {
       setUpdatingId(null);
     }
@@ -75,7 +72,7 @@ export function AdminOrdersPage() {
   if (loading) {
     return (
       <div className="admin-orders">
-        <p className="admin-orders__loading">Đang tải đơn hàng...</p>
+        <p className="admin-orders__loading">{t("admin.orders.loading")}</p>
       </div>
     );
   }
@@ -90,34 +87,34 @@ export function AdminOrdersPage() {
 
   return (
     <div className="admin-orders">
-      <h1 className="admin-orders__title">Đơn hàng</h1>
+      <h1 className="admin-orders__title">{t("admin.orders.title")}</h1>
       {orders.length === 0 ? (
-        <p className="admin-orders__empty">Chưa có đơn hàng nào.</p>
+        <p className="admin-orders__empty">{t("admin.orders.empty")}</p>
       ) : (
         <div className="admin-orders__table-wrap">
           <table className="admin-orders__table">
             <thead>
               <tr>
-                <th>Mã</th>
-                <th>Ngày</th>
-                <th>SĐT</th>
-                <th>Địa chỉ giao hàng</th>
-                <th>PT thanh toán</th>
-                <th>Tổng</th>
-                <th>Trạng thái</th>
+                <th>{t("admin.orders.id")}</th>
+                <th>{t("admin.orders.date")}</th>
+                <th>{t("admin.orders.phone")}</th>
+                <th>{t("admin.orders.shippingAddress")}</th>
+                <th>{t("admin.orders.paymentMethod")}</th>
+                <th>{t("admin.orders.total")}</th>
+                <th>{t("admin.orders.status")}</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((order) => (
                 <tr key={order.id}>
                   <td className="admin-orders__id">{order.id.slice(0, 8)}…</td>
-                  <td>{formatDate(order.createdAt)}</td>
+                  <td>{formatDate(order.createdAt, locale)}</td>
                   <td>{order.phone ?? "—"}</td>
                   <td className="admin-orders__address" title={order.shippingAddress ?? undefined}>
                     {order.shippingAddress ? (order.shippingAddress.length > 40 ? `${order.shippingAddress.slice(0, 40)}…` : order.shippingAddress) : "—"}
                   </td>
-                  <td>{order.paymentMethod === "card" ? "Thẻ" : order.paymentMethod === "cod" ? "COD" : order.paymentMethod}</td>
-                  <td>{formatPrice(order.total, order.currency)}</td>
+                  <td>{order.paymentMethod === "card" ? t("store.checkout.card") : order.paymentMethod === "cod" ? "COD" : order.paymentMethod}</td>
+                  <td>{formatPrice(order.total, order.currency, locale)}</td>
                   <td>
                     <select
                       className="admin-orders__select"
@@ -125,9 +122,9 @@ export function AdminOrdersPage() {
                       onChange={(e) => handleStatusChange(order.id, e.target.value)}
                       disabled={updatingId === order.id}
                     >
-                      {STATUS_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
+                      {STATUS_VALUES.map((value) => (
+                        <option key={value} value={value}>
+                          {t(`admin.orders.status${value.charAt(0).toUpperCase() + value.slice(1)}`)}
                         </option>
                       ))}
                     </select>

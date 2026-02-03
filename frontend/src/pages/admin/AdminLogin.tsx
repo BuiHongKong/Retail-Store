@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAdmin } from "../../admin/AdminContext";
 import "../../pages/Login.css";
 
 export function AdminLoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login, adminUser } = useAdmin();
   const [email, setEmail] = useState("");
@@ -15,7 +17,7 @@ export function AdminLoginPage() {
     e.preventDefault();
     setError(null);
     if (!email.trim() || !password) {
-      setError("Vui lòng nhập email và mật khẩu.");
+      setError(t("store.auth.emailPasswordRequired"));
       return;
     }
     setSubmitting(true);
@@ -23,7 +25,7 @@ export function AdminLoginPage() {
       await login(email.trim(), password);
       navigate("/admin", { replace: true });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Đăng nhập thất bại");
+      setError(e instanceof Error ? e.message : t("store.auth.loginError"));
     } finally {
       setSubmitting(false);
     }
@@ -37,10 +39,10 @@ export function AdminLoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-page__card">
-        <h1 className="auth-page__title">Đăng nhập Admin</h1>
+        <h1 className="auth-page__title">{t("admin.login.title")}</h1>
         <form className="auth-page__form" onSubmit={handleSubmit}>
           <div className="auth-page__field">
-            <label className="auth-page__label" htmlFor="admin-email">Email</label>
+            <label className="auth-page__label" htmlFor="admin-email">{t("admin.login.email")}</label>
             <input
               id="admin-email"
               type="email"
@@ -53,21 +55,21 @@ export function AdminLoginPage() {
             />
           </div>
           <div className="auth-page__field">
-            <label className="auth-page__label" htmlFor="admin-password">Mật khẩu</label>
+            <label className="auth-page__label" htmlFor="admin-password">{t("admin.login.password")}</label>
             <input
               id="admin-password"
               type="password"
               className="auth-page__input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="mật khẩu"
+              placeholder="••••••••"
               autoComplete="current-password"
               required
             />
           </div>
           {error && <p className="auth-page__error" role="alert">{error}</p>}
           <button type="submit" className="auth-page__submit" disabled={submitting}>
-            {submitting ? "Đang xử lý..." : "Đăng nhập"}
+            {submitting ? t("store.auth.processing") : t("admin.login.submit")}
           </button>
         </form>
       </div>

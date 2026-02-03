@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import "./Login.css";
 
-const DEFAULT_USER_HINT = "Tài khoản dùng thử: demo@example.com / demo123";
-
 export function LoginPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
@@ -19,7 +19,7 @@ export function LoginPage() {
     e.preventDefault();
     setError(null);
     if (!email.trim() || !password) {
-      setError("Vui lòng nhập email và mật khẩu.");
+      setError(t("store.auth.emailPasswordRequired"));
       return;
     }
     setSubmitting(true);
@@ -27,7 +27,7 @@ export function LoginPage() {
       await login(email.trim(), password);
       navigate(redirectTo, { replace: true });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Đăng nhập thất bại");
+      setError(e instanceof Error ? e.message : t("store.auth.loginError"));
     } finally {
       setSubmitting(false);
     }
@@ -41,10 +41,10 @@ export function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-page__card">
-        <h1 className="auth-page__title">Đăng nhập</h1>
+        <h1 className="auth-page__title">{t("store.auth.loginTitle")}</h1>
         <form className="auth-page__form" onSubmit={handleSubmit}>
           <div className="auth-page__field">
-            <label className="auth-page__label" htmlFor="login-email">Email</label>
+            <label className="auth-page__label" htmlFor="login-email">{t("store.auth.email")}</label>
             <input
               id="login-email"
               type="email"
@@ -57,28 +57,28 @@ export function LoginPage() {
             />
           </div>
           <div className="auth-page__field">
-            <label className="auth-page__label" htmlFor="login-password">Mật khẩu</label>
+            <label className="auth-page__label" htmlFor="login-password">{t("store.auth.password")}</label>
             <input
               id="login-password"
               type="password"
               className="auth-page__input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="mật khẩu"
+              placeholder="••••••••"
               autoComplete="current-password"
               required
             />
           </div>
           {error && <p className="auth-page__error" role="alert">{error}</p>}
           {authRequired && (
-            <p className="auth-page__hint">{DEFAULT_USER_HINT}</p>
+            <p className="auth-page__hint">{t("store.auth.demoHint")}</p>
           )}
           <button type="submit" className="auth-page__submit" disabled={submitting}>
-            {submitting ? "Đang xử lý..." : "Đăng nhập"}
+            {submitting ? t("store.auth.processing") : t("store.auth.login")}
           </button>
         </form>
         <p className="auth-page__footer">
-          Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
+          {t("store.auth.noAccount")} <Link to="/register">{t("store.auth.register")}</Link>
         </p>
       </div>
     </div>

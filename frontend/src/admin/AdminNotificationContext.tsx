@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 import "./AdminNotification.css";
 
 export type ToastType = "error" | "success" | "info";
@@ -33,6 +34,7 @@ const AdminNotificationContext = createContext<AdminNotificationContextValue | n
 const TOAST_DURATION_MS = 4000;
 
 export function AdminNotificationProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const [toast, setToast] = useState<ToastState>({ message: "", type: "info", visible: false });
   const [confirm, setConfirm] = useState<ConfirmState>({
     message: "",
@@ -104,14 +106,14 @@ export function AdminNotificationProvider({ children }: { children: ReactNode })
                 className="admin-notif__btn admin-notif__btn--secondary"
                 onClick={confirm.onCancel}
               >
-                Hủy
+                {t("admin.notify.cancel")}
               </button>
               <button
                 type="button"
                 className="admin-notif__btn admin-notif__btn--primary"
                 onClick={confirm.onConfirm}
               >
-                Xác nhận
+                {t("admin.notify.confirm")}
               </button>
             </div>
           </div>

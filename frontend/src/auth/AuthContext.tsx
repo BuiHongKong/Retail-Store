@@ -7,8 +7,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { setLocale } from "../i18n/i18n";
 import { checkAuthStatus, getMe, getStoredToken, login as apiLogin, logout as apiLogout, register as apiRegister } from "./api";
 import type { User } from "./types";
+
+function applyUserLocale(user: User | null): void {
+  if (user?.preferredLocale === "vi" || user?.preferredLocale === "en") {
+    setLocale(user.preferredLocale);
+  }
+}
 
 interface AuthContextValue {
   user: User | null;
@@ -39,7 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (status.enabled && getStoredToken()) {
           try {
             const u = await getMe();
-            if (!cancelled) setUser(u);
+            if (!cancelled) {
+              setUser(u);
+              applyUserLocale(u);
+            }
           } catch {
             if (!cancelled) setUser(null);
           }
@@ -67,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const u = await getMe();
       setUser(u);
+      applyUserLocale(u);
     } catch {
       setUser(null);
     }
@@ -75,11 +86,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     const { user: u } = await apiLogin(email, password);
     setUser(u);
+    applyUserLocale(u);
   }, []);
 
   const register = useCallback(async (email: string, password: string, name?: string) => {
     const { user: u } = await apiRegister(email, password, name);
     setUser(u);
+    applyUserLocale(u);
   }, []);
 
   const logout = useCallback(() => {

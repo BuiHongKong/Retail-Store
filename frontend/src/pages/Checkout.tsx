@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useCart } from "../cart/CartContext";
 import { fetchCheckoutPreview, submitCheckout } from "../checkout/api";
 import type { CheckoutPreviewResponse } from "../checkout/types";
 import type { CheckoutPayload } from "../checkout/types";
 import "./Checkout.css";
 
-function formatPrice(price: number, currency: string): string {
+function formatPrice(price: number, currency: string, locale: string): string {
   if (currency === "VND") {
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(price);
@@ -17,6 +18,8 @@ function formatPrice(price: number, currency: string): string {
 }
 
 export function CheckoutPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "en" ? "en" : "vi";
   const { refreshCart } = useCart();
   const [preview, setPreview] = useState<CheckoutPreviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +47,7 @@ export function CheckoutPage() {
       })
       .catch((e) => {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Lỗi tải giỏ hàng");
+          setError(e instanceof Error ? e.message : t("store.checkout.loadCartError"));
           setPreview(null);
         }
       })
@@ -54,25 +57,25 @@ export function CheckoutPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
     if (!preview || preview.items.length === 0) {
-      setSubmitError("Giỏ hàng trống.");
+      setSubmitError(t("store.checkout.cartEmpty"));
       return;
     }
     if (!shippingAddress.trim()) {
-      setSubmitError("Vui lòng nhập địa chỉ giao hàng.");
+      setSubmitError(t("store.checkout.enterAddress"));
       return;
     }
     if (!phone.trim()) {
-      setSubmitError("Vui lòng nhập số điện thoại.");
+      setSubmitError(t("store.checkout.enterPhone"));
       return;
     }
     if (paymentMethod === "card" && !cardHolder.trim()) {
-      setSubmitError("Vui lòng nhập tên chủ thẻ.");
+      setSubmitError(t("store.checkout.enterCardHolder"));
       return;
     }
     setSubmitting(true);
@@ -92,7 +95,7 @@ export function CheckoutPage() {
       setOrderId(res.orderId);
       await refreshCart();
     } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : "Lỗi thanh toán");
+      setSubmitError(e instanceof Error ? e.message : t("store.checkout.paymentError"));
     } finally {
       setSubmitting(false);
     }
@@ -102,12 +105,12 @@ export function CheckoutPage() {
     return (
       <div className="checkout checkout--success">
         <div className="checkout__success-card">
-          <h2 className="checkout__success-title">Đặt hàng thành công</h2>
+          <h2 className="checkout__success-title">{t("store.checkout.successTitle")}</h2>
           <p className="checkout__success-message">
-            Đơn hàng của bạn đã được tạo (thanh toán giả lập). Mã đơn: <strong>{orderId}</strong>
+            {t("store.checkout.successMessage")} <strong>{orderId}</strong>
           </p>
           <Link to="/" className="checkout__success-link">
-            Về trang chủ
+            {t("common.homeLink")}
           </Link>
         </div>
       </div>
@@ -117,7 +120,7 @@ export function CheckoutPage() {
   if (loading) {
     return (
       <div className="checkout">
-        <p className="checkout__loading">Đang tải...</p>
+        <p className="checkout__loading">{t("common.loading")}</p>
       </div>
     );
   }
@@ -125,8 +128,8 @@ export function CheckoutPage() {
   if (error || !preview) {
     return (
       <div className="checkout">
-        <p className="checkout__error">{error ?? "Không có dữ liệu"}</p>
-        <Link to="/">Về trang chủ</Link>
+        <p className="checkout__error">{error ?? t("common.noData")}</p>
+        <Link to="/">{t("common.homeLink")}</Link>
       </div>
     );
   }
@@ -134,8 +137,8 @@ export function CheckoutPage() {
   if (preview.items.length === 0) {
     return (
       <div className="checkout">
-        <p className="checkout__empty">Giỏ hàng trống. Thêm sản phẩm trước khi thanh toán.</p>
-        <Link to="/">Về trang chủ</Link>
+        <p className="checkout__empty">{t("store.checkout.emptyCartMessage")}</p>
+        <Link to="/">{t("common.homeLink")}</Link>
       </div>
     );
   }
@@ -146,10 +149,10 @@ export function CheckoutPage() {
   return (
     <div className="checkout">
       <div className="checkout__content">
-        <h1 className="checkout__title">Thanh toán</h1>
+        <h1 className="checkout__title">{t("store.checkout.title")}</h1>
 
         <section className="checkout__preview">
-          <h2 className="checkout__section-title">Đơn hàng</h2>
+          <h2 className="checkout__section-title">{t("store.checkout.orderTitle")}</h2>
           <ul className="checkout__list">
             {preview.items.map((item) => (
               <li key={item.productId} className="checkout__item">
@@ -163,26 +166,26 @@ export function CheckoutPage() {
                 <div className="checkout__item-info">
                   <span className="checkout__item-name">{item.name}</span>
                   <span className="checkout__item-meta">
-                    {formatPrice(item.price, item.currency)} × {item.quantity}
+                    {formatPrice(item.price, item.currency, locale)} × {item.quantity}
                   </span>
                 </div>
                 <span className="checkout__item-total">
-                  {formatPrice(item.price * item.quantity, item.currency)}
+                  {formatPrice(item.price * item.quantity, item.currency, locale)}
                 </span>
               </li>
             ))}
           </ul>
           <div className="checkout__preview-total">
-            <span>Tổng cộng:</span>
-            <strong>{formatPrice(total, currency)}</strong>
+            <span>{t("store.checkout.totalLabel")}</span>
+            <strong>{formatPrice(total, currency, locale)}</strong>
           </div>
         </section>
 
         <form className="checkout__form" onSubmit={handleSubmit}>
-          <h2 className="checkout__section-title">Thông tin thanh toán (giả lập)</h2>
+          <h2 className="checkout__section-title">{t("store.checkout.paymentTitle")}</h2>
 
           <div className="checkout__field">
-            <label className="checkout__label">Phương thức thanh toán</label>
+            <label className="checkout__label">{t("store.checkout.paymentMethod")}</label>
             <div className="checkout__radios">
               <label className="checkout__radio">
                 <input
@@ -192,7 +195,7 @@ export function CheckoutPage() {
                   checked={paymentMethod === "cod"}
                   onChange={() => setPaymentMethod("cod")}
                 />
-                <span>Thanh toán khi nhận hàng (COD)</span>
+                <span>{t("store.checkout.cod")}</span>
               </label>
               <label className="checkout__radio">
                 <input
@@ -202,14 +205,14 @@ export function CheckoutPage() {
                   checked={paymentMethod === "card"}
                   onChange={() => setPaymentMethod("card")}
                 />
-                <span>Thẻ (giả lập)</span>
+                <span>{t("store.checkout.card")}</span>
               </label>
             </div>
           </div>
 
           <div className="checkout__field">
             <label className="checkout__label" htmlFor="shippingAddress">
-              Địa chỉ giao hàng
+              {t("store.checkout.shippingAddress")} <span className="checkout__required">{t("store.checkout.required")}</span>
             </label>
             <textarea
               id="shippingAddress"
@@ -217,13 +220,14 @@ export function CheckoutPage() {
               value={shippingAddress}
               onChange={(e) => setShippingAddress(e.target.value)}
               rows={2}
-              placeholder="Số nhà, đường, phường/xã, quận/huyện..."
+              placeholder={t("store.checkout.shippingPlaceholder")}
+              required
             />
           </div>
 
           <div className="checkout__field">
             <label className="checkout__label" htmlFor="phone">
-              Số điện thoại <span className="checkout__required">*</span>
+              {t("store.checkout.phone")} <span className="checkout__required">{t("store.checkout.required")}</span>
             </label>
             <input
               id="phone"
@@ -231,7 +235,7 @@ export function CheckoutPage() {
               className="checkout__input"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="0912345678"
+              placeholder={t("store.checkout.phonePlaceholder")}
               required
             />
           </div>
@@ -240,7 +244,7 @@ export function CheckoutPage() {
             <>
               <div className="checkout__field">
                 <label className="checkout__label" htmlFor="cardHolder">
-                  Tên chủ thẻ <span className="checkout__required">*</span>
+                  {t("store.checkout.cardHolder")} <span className="checkout__required">{t("store.checkout.required")}</span>
                 </label>
                 <input
                   id="cardHolder"
@@ -248,13 +252,13 @@ export function CheckoutPage() {
                   className="checkout__input"
                   value={cardHolder}
                   onChange={(e) => setCardHolder(e.target.value)}
-                  placeholder="NGUYEN VAN A"
+                  placeholder={t("store.checkout.cardHolderPlaceholder")}
                   required
                 />
               </div>
               <div className="checkout__field">
                 <label className="checkout__label" htmlFor="cardNumber">
-                  Số thẻ (giả lập)
+                  {t("store.checkout.cardNumber")}
                 </label>
                 <input
                   id="cardNumber"
@@ -262,13 +266,13 @@ export function CheckoutPage() {
                   className="checkout__input"
                   value={cardNumber}
                   onChange={(e) => setCardNumber(e.target.value)}
-                  placeholder="4111 1111 1111 1111"
+                  placeholder={t("store.checkout.cardNumberPlaceholder")}
                 />
               </div>
               <div className="checkout__row">
                 <div className="checkout__field">
                   <label className="checkout__label" htmlFor="expiry">
-                    Ngày hết hạn
+                    {t("store.checkout.expiry")}
                   </label>
                   <input
                     id="expiry"
@@ -276,12 +280,12 @@ export function CheckoutPage() {
                     className="checkout__input"
                     value={expiry}
                     onChange={(e) => setExpiry(e.target.value)}
-                    placeholder="MM/YY"
+                    placeholder={t("store.checkout.expiryPlaceholder")}
                   />
                 </div>
                 <div className="checkout__field">
                   <label className="checkout__label" htmlFor="cvc">
-                    CVC
+                    {t("store.checkout.cvc")}
                   </label>
                   <input
                     id="cvc"
@@ -289,7 +293,7 @@ export function CheckoutPage() {
                     className="checkout__input"
                     value={cvc}
                     onChange={(e) => setCvc(e.target.value)}
-                    placeholder="123"
+                    placeholder={t("store.checkout.cvcPlaceholder")}
                   />
                 </div>
               </div>
@@ -304,14 +308,14 @@ export function CheckoutPage() {
 
           <div className="checkout__actions">
             <Link to="/" className="checkout__back">
-              Quay lại
+              {t("common.back")}
             </Link>
             <button
               type="submit"
               className="checkout__submit"
               disabled={submitting}
             >
-              {submitting ? "Đang xử lý..." : "Đặt hàng (giả lập)"}
+              {submitting ? t("store.checkout.submitting") : t("store.checkout.submit")}
             </button>
           </div>
         </form>

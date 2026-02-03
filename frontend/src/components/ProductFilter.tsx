@@ -1,10 +1,14 @@
+import { useTranslation } from "react-i18next";
 import "./ProductFilter.css";
 
-export const CATEGORY_OPTIONS = [
-  { id: "cat-character", name: "Character" },
-  { id: "cat-food", name: "Food" },
-  { id: "cat-animal", name: "Animal" },
-] as const;
+const CATEGORY_IDS = ["cat-character", "cat-food", "cat-animal"] as const;
+const CATEGORY_KEYS = {
+  "cat-character": "store.filter.categoryCharacter",
+  "cat-food": "store.filter.categoryFood",
+  "cat-animal": "store.filter.categoryAnimal",
+} as const;
+
+export const CATEGORY_OPTIONS = CATEGORY_IDS.map((id) => ({ id }));
 
 export interface FilterState {
   categoryIds: string[];
@@ -16,8 +20,8 @@ export interface PriceRange {
   max: number;
 }
 
-function formatVnd(n: number): string {
-  return new Intl.NumberFormat("vi-VN").format(n) + " ₫";
+function formatVnd(n: number, locale: string): string {
+  return new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN").format(n) + " ₫";
 }
 
 interface ProductFilterProps {
@@ -28,6 +32,9 @@ interface ProductFilterProps {
 }
 
 export function ProductFilter({ filter, onFilterChange, priceRange }: ProductFilterProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "en" ? "en" : "vi";
+
   const handleCategoryToggle = (id: string) => {
     const next = filter.categoryIds.includes(id)
       ? filter.categoryIds.filter((c) => c !== id)
@@ -56,10 +63,10 @@ export function ProductFilter({ filter, onFilterChange, priceRange }: ProductFil
 
   return (
     <aside className="product-filter">
-      <h3 className="product-filter__title">Bộ lọc</h3>
+      <h3 className="product-filter__title">{t("store.filter.title")}</h3>
 
       <div className="product-filter__block">
-        <h4 className="product-filter__label">Category</h4>
+        <h4 className="product-filter__label">{t("store.filter.categoryLabel")}</h4>
         <ul className="product-filter__list">
           {CATEGORY_OPTIONS.map((opt) => (
             <li key={opt.id} className="product-filter__item">
@@ -68,9 +75,9 @@ export function ProductFilter({ filter, onFilterChange, priceRange }: ProductFil
                   type="checkbox"
                   checked={filter.categoryIds.includes(opt.id)}
                   onChange={() => handleCategoryToggle(opt.id)}
-                  aria-label={opt.name}
+                  aria-label={t(CATEGORY_KEYS[opt.id])}
                 />
-                <span>{opt.name}</span>
+                <span>{t(CATEGORY_KEYS[opt.id])}</span>
               </label>
             </li>
           ))}
@@ -78,11 +85,11 @@ export function ProductFilter({ filter, onFilterChange, priceRange }: ProductFil
       </div>
 
       <div className="product-filter__block">
-        <h4 className="product-filter__label">Giá tối đa (VND)</h4>
+        <h4 className="product-filter__label">{t("store.filter.maxPrice")}</h4>
         <div className="product-filter__sliders">
           <div className="product-filter__slider-row">
             <span className="product-filter__slider-value">
-              Đến: {formatVnd(sliderValue)}
+              {t("store.filter.upTo")} {formatVnd(sliderValue, locale)}
             </span>
             <input
               type="range"
@@ -92,17 +99,17 @@ export function ProductFilter({ filter, onFilterChange, priceRange }: ProductFil
               value={sliderValue}
               onChange={(e) => handleSliderChange(Number(e.target.value))}
               className="product-filter__range"
-              aria-label="Giá tối đa"
+              aria-label={t("store.filter.maxPriceAria")}
             />
             <span className="product-filter__slider-hint">
-              {formatVnd(rangeMin)} – {formatVnd(rangeMax)}
+              {formatVnd(rangeMin, locale)} – {formatVnd(rangeMax, locale)}
             </span>
           </div>
         </div>
       </div>
 
       <button type="button" className="product-filter__reset" onClick={handleReset}>
-        Xóa bộ lọc
+        {t("store.filter.reset")}
       </button>
     </aside>
   );

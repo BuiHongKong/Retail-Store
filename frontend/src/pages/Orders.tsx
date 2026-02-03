@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { fetchMyOrders } from "../orders/api";
 import type { Order } from "../orders/types";
 import "./Orders.css";
 
-function formatPrice(price: number, currency: string): string {
+function formatPrice(price: number, currency: string, locale: string): string {
   if (currency === "VND") {
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(price);
@@ -15,8 +16,8 @@ function formatPrice(price: number, currency: string): string {
   return `${currency} ${price}`;
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("vi-VN", {
+function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale === "en" ? "en-US" : "vi-VN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -25,26 +26,29 @@ function formatDate(iso: string): string {
   });
 }
 
-const ORDER_STATUS_LABELS: Record<string, string> = {
-  pending: "Chờ xử lý",
-  confirmed: "Đã xác nhận",
-  shipping: "Đang giao",
-  delivered: "Đã giao",
-  cancelled: "Đã hủy",
-  completed: "Hoàn thành",
+const ORDER_STATUS_KEYS: Record<string, string> = {
+  pending: "store.orders.statusPending",
+  confirmed: "store.orders.statusConfirmed",
+  shipping: "store.orders.statusShipping",
+  delivered: "store.orders.statusDelivered",
+  cancelled: "store.orders.statusCancelled",
+  completed: "store.orders.statusCompleted",
 };
 
-function getOrderStatusLabel(status: string): string {
-  const key = (status || "").toLowerCase();
-  return ORDER_STATUS_LABELS[key] ?? (status || "—");
-}
-
 export function OrdersPage() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "en" ? "en" : "vi";
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  function getOrderStatusLabel(status: string): string {
+    const key = (status || "").toLowerCase();
+    const tKey = ORDER_STATUS_KEYS[key];
+    return tKey ? t(tKey) : (status || "—");
+  }
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -62,7 +66,7 @@ export function OrdersPage() {
       })
       .catch((e) => {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Lỗi tải đơn hàng");
+          setError(e instanceof Error ? e.message : t("store.orders.loadError"));
           setOrders([]);
         }
       })
@@ -72,12 +76,12 @@ export function OrdersPage() {
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, t]);
 
   if (authLoading) {
     return (
       <div className="orders">
-        <p className="orders__loading">Đang tải...</p>
+        <p className="orders__loading">{t("common.loading")}</p>
       </div>
     );
   }
@@ -89,7 +93,7 @@ export function OrdersPage() {
   if (loading) {
     return (
       <div className="orders">
-        <p className="orders__loading">Đang tải đơn hàng...</p>
+        <p className="orders__loading">{t("store.orders.loadingOrders")}</p>
       </div>
     );
   }
@@ -98,7 +102,7 @@ export function OrdersPage() {
     return (
       <div className="orders">
         <p className="orders__error">{error}</p>
-        <Link to="/">Về trang chủ</Link>
+        <Link to="/">{t("common.homeLink")}</Link>
       </div>
     );
   }
@@ -106,9 +110,9 @@ export function OrdersPage() {
   return (
     <div className="orders">
       <div className="orders__content">
-        <h1 className="orders__title">Lịch sử đơn hàng</h1>
+        <h1 className="orders__title">{t("store.orders.title")}</h1>
         {orders.length === 0 ? (
-          <p className="orders__empty">Bạn chưa có đơn hàng nào (đơn đặt khi đã đăng nhập).</p>
+          <p className="orders__empty">{t("store.orders.emptyLoggedIn")}</p>
         ) : (
           <ul className="orders__list">
             {orders.map((order) => (
@@ -116,13 +120,13 @@ export function OrdersPage() {
                 <div className="orders__card-header">
                   <div className="orders__card-meta">
                     <span className="orders__card-id">{order.id.slice(0, 8)}…</span>
-                    <span className="orders__card-date">{formatDate(order.createdAt)}</span>
+                    <span className="orders__card-date">{formatDate(order.createdAt, locale)}</span>
                     <span className={`orders__card-status orders__card-status--${(order.status || "pending").toLowerCase()}`}>
                       {getOrderStatusLabel(order.status)}
                     </span>
                   </div>
                   <span className="orders__card-total">
-                    {formatPrice(order.total, order.currency)}
+                    {formatPrice(order.total, order.currency, locale)}
                   </span>
                 </div>
                 <div className="orders__card-body">
@@ -139,11 +143,11 @@ export function OrdersPage() {
                         <div className="orders__item-info">
                           <span className="orders__item-name">{item.product.name}</span>
                           <span className="orders__item-meta">
-                            {formatPrice(item.priceAtOrder, item.product.currency)} × {item.quantity}
+                            {formatPrice(item.priceAtOrder, item.product.currency, locale)} × {item.quantity}
                           </span>
                         </div>
                         <span className="orders__item-total">
-                          {formatPrice(item.priceAtOrder * item.quantity, item.product.currency)}
+                          {formatPrice(item.priceAtOrder * item.quantity, item.product.currency, locale)}
                         </span>
                       </li>
                     ))}
@@ -154,7 +158,7 @@ export function OrdersPage() {
           </ul>
         )}
         <Link to="/" className="orders__back">
-          Về trang chủ
+          {t("common.homeLink")}
         </Link>
       </div>
     </div>

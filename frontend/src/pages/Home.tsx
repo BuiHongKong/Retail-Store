@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ProductCard } from "../components/ProductCard";
 import { ProductFilter, type FilterState } from "../components/ProductFilter";
 import { fetchProducts } from "../product/api";
@@ -28,6 +29,7 @@ interface HomePageProps {
 }
 
 export function HomePage({ onReadyChange }: HomePageProps) {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -45,9 +47,7 @@ export function HomePage({ onReadyChange }: HomePageProps) {
       .catch(() => {
         if (!cancelled) {
           setProducts([]);
-          setApiError(
-            "Không kết nối được API. Chạy backend trong terminal: cd backend && npm start"
-          );
+          setApiError(t("store.home.apiError"));
         }
       })
       .finally(() => {
@@ -79,9 +79,9 @@ export function HomePage({ onReadyChange }: HomePageProps) {
             className="app__hero-banner"
           />
           <div className="app__hero-overlay">
-            <h1 className="app__hero-title">Cute vừa đủ, yêu hơi nhiều</h1>
+            <h1 className="app__hero-title">{t("store.home.heroTitle")}</h1>
             <a href="#products" className="app__hero-cta" role="button">
-              <span className="app__hero-cta-inner">Vô coi cho vui</span>
+              <span className="app__hero-cta-inner">{t("store.home.heroCta")}</span>
             </a>
           </div>
         </div>
@@ -95,13 +95,13 @@ export function HomePage({ onReadyChange }: HomePageProps) {
             priceRange={priceRange}
           />
           <div className="app__main">
-            <h2 className="app__section-title">Sản phẩm</h2>
+            <h2 className="app__section-title">{t("store.home.productsTitle")}</h2>
             {loading ? (
-              <p className="app__loading">Đang tải...</p>
+              <p className="app__loading">{t("common.loading")}</p>
             ) : apiError ? (
               <p className="app__error">{apiError}</p>
             ) : filteredProducts.length === 0 ? (
-              <p className="app__empty">Không có sản phẩm nào phù hợp.</p>
+              <p className="app__empty">{t("store.home.noProducts")}</p>
             ) : (
               <div className="app__cards">
                 {filteredProducts.map((product) => (

@@ -69,6 +69,22 @@ export async function getMe(): Promise<User> {
   return data;
 }
 
+/** PATCH /auth/me — update preferredLocale (vi | en). Requires auth. */
+export async function patchPreferredLocale(locale: "vi" | "en"): Promise<User> {
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    method: "PATCH",
+    headers: authHeaders(),
+    body: JSON.stringify({ preferredLocale: locale }),
+  });
+  if (res.status === 401) {
+    clearStoredToken();
+    throw new Error("Unauthorized");
+  }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to update user");
+  return data;
+}
+
 export function logout(): void {
   clearStoredToken();
 }

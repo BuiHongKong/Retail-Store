@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useCart } from "../cart/CartContext";
 import { CartIcon } from "./CartIcon";
 import "./CartDropdown.css";
 
-function formatPrice(price: number, currency: string): string {
+function formatPrice(price: number, currency: string, locale: string): string {
   if (currency === "VND") {
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(price);
@@ -28,7 +29,9 @@ export function CartDropdown({
   triggerRef,
   dropdownRef,
 }: CartDropdownProps) {
+  const { t, i18n } = useTranslation();
   const { items, loading, totalCount, removeItem, updateQuantity, clearAll } = useCart();
+  const locale = i18n.language === "en" ? "en" : "vi";
 
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const currency = items[0]?.currency ?? "VND";
@@ -40,7 +43,7 @@ export function CartDropdown({
         className="app__cart-trigger"
         ref={triggerRef}
         onClick={onToggle}
-        aria-label="Giỏ hàng"
+        aria-label={t("store.cart.ariaCart")}
         aria-expanded={isOpen}
       >
         <CartIcon />
@@ -51,25 +54,25 @@ export function CartDropdown({
         )}
       </button>
       {isOpen && (
-        <div className="app__cart-dropdown" role="dialog" aria-label="Giỏ hàng">
+        <div className="app__cart-dropdown" role="dialog" aria-label={t("store.cart.ariaCart")}>
           <div className="app__cart-dropdown-header">
-            <span className="app__cart-dropdown-title">Giỏ hàng</span>
+            <span className="app__cart-dropdown-title">{t("store.cart.title")}</span>
             {items.length > 0 && (
               <button
                 type="button"
                 className="app__cart-clear-all"
                 onClick={() => clearAll()}
-                aria-label="Xóa toàn bộ giỏ hàng"
+                aria-label={t("store.cart.clearAll")}
               >
-                Clear all
+                {t("common.clearAll")}
               </button>
             )}
           </div>
           <div className="app__cart-dropdown-body">
             {loading ? (
-              <p className="app__cart-empty">Đang tải...</p>
+              <p className="app__cart-empty">{t("common.loading")}</p>
             ) : items.length === 0 ? (
-              <p className="app__cart-empty">Giỏ trống</p>
+              <p className="app__cart-empty">{t("store.cart.empty")}</p>
             ) : (
               <ul className="app__cart-list">
                 {items.map((item) => (
@@ -84,7 +87,7 @@ export function CartDropdown({
                     <div className="app__cart-item-info">
                       <span className="app__cart-item-name">{item.name}</span>
                       <span className="app__cart-item-price">
-                        {formatPrice(item.price, item.currency)} × {item.quantity}
+                        {formatPrice(item.price, item.currency, locale)} × {item.quantity}
                       </span>
                     </div>
                     <div className="app__cart-item-actions">
@@ -93,7 +96,7 @@ export function CartDropdown({
                         className="app__cart-item-qty"
                         onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                         disabled={item.quantity <= 1}
-                        aria-label="Giảm số lượng"
+                        aria-label={t("store.cart.decreaseQty")}
                       >
                         −
                       </button>
@@ -102,7 +105,7 @@ export function CartDropdown({
                         type="button"
                         className="app__cart-item-qty"
                         onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                        aria-label="Tăng số lượng"
+                        aria-label={t("store.cart.increaseQty")}
                       >
                         +
                       </button>
@@ -110,7 +113,7 @@ export function CartDropdown({
                         type="button"
                         className="app__cart-item-remove"
                         onClick={() => removeItem(item.productId)}
-                        aria-label="Xóa khỏi giỏ"
+                        aria-label={t("store.cart.removeFromCart")}
                       >
                         ×
                       </button>
@@ -123,9 +126,9 @@ export function CartDropdown({
           {items.length > 0 && (
             <div className="app__cart-dropdown-footer">
               <div className="app__cart-dropdown-total-row">
-                <span className="app__cart-total-label">Tổng:</span>
+                <span className="app__cart-total-label">{t("store.cart.total")}</span>
                 <span className="app__cart-total-value">
-                  {formatPrice(total, currency)}
+                  {formatPrice(total, currency, locale)}
                 </span>
               </div>
               <Link
@@ -133,7 +136,7 @@ export function CartDropdown({
                 className="app__cart-checkout-link"
                 onClick={onClose}
               >
-                Thanh toán
+                {t("store.cart.checkout")}
               </Link>
             </div>
           )}

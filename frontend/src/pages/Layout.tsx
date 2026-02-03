@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, Outlet, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../auth/AuthContext";
 import { CartDropdown } from "../components/CartDropdown";
 import { LikesDropdown } from "../components/LikesDropdown";
+import { LanguageSwitcher } from "../components/LanguageSwitcher";
 
 export function Layout() {
+  const { t } = useTranslation();
   const location = useLocation();
   const { user, loading: authLoading, authRequired, logout } = useAuth();
   const isLoginOrRegister = location.pathname === "/login" || location.pathname === "/register";
@@ -66,19 +69,20 @@ export function Layout() {
                   >
                     {(user.name || user.email).charAt(0).toUpperCase()}
                   </span>
-                  <Link to="/orders" className="app__header-user-link">Lịch sử đơn hàng</Link>
+                  <Link to="/orders" className="app__header-user-link">{t("store.nav.orderHistory")}</Link>
                   <button type="button" className="app__header-logout" onClick={() => logout()}>
-                    Đăng xuất
+                    {t("store.nav.logout")}
                   </button>
                 </span>
               ) : (
                 <span className="app__header-auth">
-                  <Link to="/login" className="app__header-auth-link">Đăng nhập</Link>
-                  <Link to="/register" className="app__header-auth-link">Đăng ký</Link>
+                  <Link to="/login" className="app__header-auth-link">{t("store.nav.login")}</Link>
+                  <Link to="/register" className="app__header-auth-link">{t("store.nav.register")}</Link>
                 </span>
               )}
             </>
           )}
+          <LanguageSwitcher />
           <LikesDropdown
             isOpen={likesOpen}
             onToggle={() => setLikesOpen((prev) => !prev)}

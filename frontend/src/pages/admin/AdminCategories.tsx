@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getAdminCategories,
   createCategory,
@@ -8,6 +9,7 @@ import {
 import "./AdminCategories.css";
 
 export function AdminCategoriesPage() {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +22,7 @@ export function AdminCategoriesPage() {
   const load = () => {
     getAdminCategories()
       .then(setCategories)
-      .catch((e) => setError(e instanceof Error ? e.message : "Lỗi tải danh mục"))
+      .catch((e) => setError(e instanceof Error ? e.message : t("admin.categories.loadError")))
       .finally(() => setLoading(false));
   };
 
@@ -78,7 +80,7 @@ export function AdminCategoriesPage() {
   if (loading) {
     return (
       <div className="admin-categories">
-        <p className="admin-categories__loading">Đang tải...</p>
+        <p className="admin-categories__loading">{t("common.loading")}</p>
       </div>
     );
   }
@@ -94,7 +96,7 @@ export function AdminCategoriesPage() {
   return (
     <div className="admin-categories">
       <div className="admin-categories__header">
-        <h1 className="admin-categories__title">Danh mục</h1>
+        <h1 className="admin-categories__title">{t("admin.categories.title")}</h1>
         <button
           type="button"
           className="admin-categories__btn"
@@ -104,16 +106,16 @@ export function AdminCategoriesPage() {
             setShowForm(true);
           }}
         >
-          Thêm danh mục
+          {t("admin.categories.add")}
         </button>
       </div>
 
       {showForm && (
         <form className="admin-categories__form" onSubmit={handleSubmit}>
-          <h2 className="admin-categories__form-title">{editingId ? "Chỉnh sửa" : "Thêm danh mục"}</h2>
+          <h2 className="admin-categories__form-title">{editingId ? t("admin.categories.formEdit") : t("admin.categories.formAdd")}</h2>
           {!editingId && (
             <div className="admin-categories__field">
-              <label className="admin-categories__label">Slug</label>
+              <label className="admin-categories__label">{t("admin.categories.slug")}</label>
               <input
                 type="text"
                 className="admin-categories__input"
@@ -125,28 +127,28 @@ export function AdminCategoriesPage() {
             </div>
           )}
           <div className="admin-categories__field">
-            <label className="admin-categories__label">Tên</label>
+            <label className="admin-categories__label">{t("admin.categories.name")}</label>
             <input
               type="text"
               className="admin-categories__input"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="Tên danh mục"
+              placeholder={t("admin.categories.name")}
               required
             />
           </div>
           <div className="admin-categories__field">
-            <label className="admin-categories__label">Mô tả</label>
+            <label className="admin-categories__label">{t("admin.categories.description")}</label>
             <input
               type="text"
               className="admin-categories__input"
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              placeholder="Mô tả (tùy chọn)"
+              placeholder=""
             />
           </div>
           <div className="admin-categories__field">
-            <label className="admin-categories__label">Thứ tự</label>
+            <label className="admin-categories__label">{t("admin.categories.sortOrder")}</label>
             <input
               type="number"
               className="admin-categories__input"
@@ -158,25 +160,25 @@ export function AdminCategoriesPage() {
           {submitError && <p className="admin-categories__submit-error">{submitError}</p>}
           <div className="admin-categories__form-actions">
             <button type="button" className="admin-categories__btn admin-categories__btn--secondary" onClick={resetForm}>
-              Hủy
+              {t("common.cancel")}
             </button>
             <button type="submit" className="admin-categories__btn" disabled={submitting}>
-              {submitting ? "Đang lưu..." : "Lưu"}
+              {submitting ? t("common.loading") : t("common.save")}
             </button>
           </div>
         </form>
       )}
 
       {categories.length === 0 && !showForm ? (
-        <p className="admin-categories__empty">Chưa có danh mục nào.</p>
+        <p className="admin-categories__empty">{t("admin.categories.empty")}</p>
       ) : (
         <div className="admin-categories__table-wrap">
           <table className="admin-categories__table">
             <thead>
               <tr>
-                <th>Slug</th>
-                <th>Tên</th>
-                <th>Thứ tự</th>
+                <th>{t("admin.categories.slug")}</th>
+                <th>{t("admin.categories.name")}</th>
+                <th>{t("admin.categories.sortOrder")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -188,7 +190,7 @@ export function AdminCategoriesPage() {
                   <td>{c.sortOrder}</td>
                   <td>
                     <button type="button" className="admin-categories__edit-btn" onClick={() => handleEdit(c)}>
-                      Sửa
+                      {t("admin.categories.edit")}
                     </button>
                   </td>
                 </tr>
