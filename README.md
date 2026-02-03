@@ -38,6 +38,25 @@ Retail-Store/
 
 Làm lần lượt, không bỏ bước.
 
+### 0. Nếu bạn **pull code** (repo đã có sẵn, state cũ hoặc mới)
+
+Bạn đã clone/pull và thấy sẵn thư mục `prisma/migrations/` — tức là migration đã có trong repo. Làm theo thứ tự:
+
+1. **PostgreSQL:** `docker compose up -d` (ở thư mục gốc).
+2. **Backend:** `cd backend` → tạo `.env` (xem bước 4 bên dưới) nếu chưa có → `npm install`.
+3. **Áp dụng migration có sẵn (không tạo migration mới):**
+   ```bash
+   npx prisma migrate deploy
+   ```
+   *(Dùng `migrate deploy` để chỉ apply các migration trong repo; không dùng `migrate dev --name init` trừ khi bạn tự thêm migration mới sau khi sửa `schema.prisma`.)*
+4. **Seed (nếu database trống):** `npx prisma db seed`.
+5. **Frontend:** `cd frontend` → `npm install`.
+6. Chạy các service (xem mục "Chạy project" bên dưới).
+
+**Checklist nhanh sau khi pull:** Docker up → backend `.env` + `npm install` → `prisma migrate deploy` → (tuỳ chọn) `prisma db seed` → frontend `npm install` → chạy 5 backend + 1 frontend.
+
+---
+
 ### 1. Clone và mở project
 
 ```bash
@@ -111,11 +130,15 @@ ADMIN_JWT_SECRET=admin-secret-change-in-production
 
 Vẫn trong `backend/`:
 
-```bash
-npx prisma migrate dev --name init
-```
+- **Nếu bạn pull repo đã có sẵn `prisma/migrations/`** (người khác đã tạo migration trước đó): chỉ cần áp dụng migration có sẵn:
+  ```bash
+  npx prisma migrate deploy
+  ```
+- **Nếu bạn là người tạo repo từ đầu** và chưa có thư mục migrations (hoặc vừa sửa `schema.prisma` và cần tạo migration mới):
+  ```bash
+  npx prisma migrate dev --name ten_migration
+  ```
 
-- Lần đầu sẽ tạo thư mục `prisma/migrations/` và các bảng (categories, products, carts, cart_items, likes).
 - Nếu báo lỗi kết nối: kiểm tra Docker/PostgreSQL đã chạy và `DATABASE_URL` trong `.env`.
 
 ### 6. Seed dữ liệu mẫu
@@ -244,7 +267,8 @@ Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checko
 | Chạy Auth API (bắt buộc đăng nhập) | Trong `backend/`: `npm run dev:auth` |
 | Chạy Admin API (trang /admin) | Trong `backend/`: `npm run dev:admin` |
 | Chạy frontend | Trong `frontend/`: `npm run dev` |
-| Tạo/sửa bảng DB | Trong `backend/`: `npx prisma migrate dev --name <tên>` |
+| Áp dụng migration có sẵn (sau khi pull) | Trong `backend/`: `npx prisma migrate deploy` |
+| Tạo migration mới (sửa schema) | Trong `backend/`: `npx prisma migrate dev --name <tên>` |
 | Seed lại dữ liệu | Trong `backend/`: `npx prisma db seed` |
 | Mở Prisma Studio (xem DB) | Trong `backend/`: `npx prisma studio` |
 
@@ -256,7 +280,7 @@ Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checko
   PostgreSQL chưa chạy hoặc `DATABASE_URL` trong `backend/.env` sai. Nếu dùng Docker: `docker compose up -d` và kiểm tra port **5433** trong `DATABASE_URL`.
 
 - **Migration failed**  
-  Đảm bảo đã `npm install` trong `backend/` và database đã tạo (Docker đã chạy hoặc đã tạo DB `retail_store` thủ công).
+  Đảm bảo đã `npm install` trong `backend/` và database đã tạo (Docker đã chạy hoặc đã tạo DB `retail_store` thủ công). **Sau khi pull code:** dùng `npx prisma migrate deploy` để áp dụng migration có sẵn, không dùng `migrate dev --name init` (dễ gây conflict).
 
 - **Seed failed**  
   Chạy migration trước: `npx prisma migrate dev --name init`, rồi mới chạy `npx prisma db seed`.
@@ -276,6 +300,9 @@ Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checko
 
 - **Trang Admin (/admin)**  
   Chạy `npm run dev:admin` trong `backend/`. Mở **http://localhost:5173/admin**, đăng nhập **admin@example.com** / **admin123**. Khi tắt Admin service, trang /admin hiển thị "Admin không khả dụng".
+
+- **Windows: "running scripts is disabled" khi chạy npm/npx**  
+  PowerShell chặn script: chạy lệnh qua `cmd`: ví dụ `cmd /c "cd /d d:\Retail-Store\backend && npx prisma migrate deploy"`. Hoặc mở Command Prompt (cmd) thay vì PowerShell.
 
 ---
 
