@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useCart } from "../cart/CartContext";
 import { useLikes } from "../likes/LikesContext";
 import { fetchProductBySlug } from "../product/api";
@@ -13,9 +14,9 @@ interface ProductCardProps {
   productsReady?: boolean;
 }
 
-function formatPrice(price: number, currency: string): string {
+function formatPrice(price: number, currency: string, locale: string): string {
   if (currency === "VND") {
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat(locale === "en" ? "en-US" : "vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(price);
@@ -24,6 +25,8 @@ function formatPrice(price: number, currency: string): string {
 }
 
 export function ProductCard({ slug, product: productProp, productsReady = true }: ProductCardProps) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "en" ? "en" : "vi";
   const [product, setProduct] = useState<Product | null>(productProp ?? null);
   const [loading, setLoading] = useState(!productProp);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +53,7 @@ export function ProductCard({ slug, product: productProp, productsReady = true }
       })
       .catch((err) => {
         if (!cancelled && err?.name !== "AbortError")
-          setError(err instanceof Error ? err.message : "Lỗi tải sản phẩm");
+          setError(err instanceof Error ? err.message : t("store.productCard.loadError"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -59,10 +62,10 @@ export function ProductCard({ slug, product: productProp, productsReady = true }
       cancelled = true;
       ctrl.abort();
     };
-  }, [slug, productProp]);
+  }, [slug, productProp, t]);
 
-  if (loading) return <div className="product-card product-card--loading">Đang tải...</div>;
-  if (error) return <div className="product-card product-card--error">Lỗi: {error}</div>;
+  if (loading) return <div className="product-card product-card--loading">{t("store.productCard.loading")}</div>;
+  if (error) return <div className="product-card product-card--error">{t("common.error")}: {error}</div>;
   if (!displayProduct) return null;
 
   return (
@@ -78,8 +81,8 @@ export function ProductCard({ slug, product: productProp, productsReady = true }
           className={`product-card__like ${liked ? "product-card__like--active" : ""}`}
           onClick={toggleLiked}
           disabled={!productsReady}
-          aria-label={liked ? "Bỏ thích" : "Thích"}
-          title={liked ? "Bỏ thích" : "Thích"}
+          aria-label={liked ? t("store.productCard.unlike") : t("store.productCard.like")}
+          title={liked ? t("store.productCard.unlike") : t("store.productCard.like")}
         >
           <HeartIcon filled={liked} />
         </button>
@@ -91,16 +94,16 @@ export function ProductCard({ slug, product: productProp, productsReady = true }
         )}
         <div className="product-card__rating">
           <span className="product-card__rating-value">{displayProduct.rating.toFixed(1)}</span>
-          <span className="product-card__rating-count">({displayProduct.ratingCount} đánh giá)</span>
+          <span className="product-card__rating-count">({displayProduct.ratingCount} {t("store.productCard.reviews")})</span>
         </div>
-        <p className="product-card__price">{formatPrice(displayProduct.price, displayProduct.currency)}</p>
+        <p className="product-card__price">{formatPrice(displayProduct.price, displayProduct.currency, locale)}</p>
         <button
           type="button"
           className="product-card__add-cart"
           onClick={() => addItem(displayProduct.id)}
           disabled={!productsReady}
         >
-          Thêm vào giỏ
+          {t("store.productCard.addToCart")}
         </button>
       </div>
     </article>

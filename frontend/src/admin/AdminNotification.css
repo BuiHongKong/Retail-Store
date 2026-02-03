@@ -1,0 +1,149 @@
+/* Toast — góc trên phải, tự ẩn */
+.admin-notif--toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 360px;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-size: 0.95rem;
+  animation: admin-notif-slide-in 0.25s ease-out;
+}
+
+@keyframes admin-notif-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.admin-notif--toast.admin-notif--error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.admin-notif--toast.admin-notif--success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.admin-notif--toast.admin-notif--info {
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.admin-notif__message {
+  flex: 1;
+}
+
+.admin-notif__close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.admin-notif__close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Confirm modal — overlay */
+.admin-notif--confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  animation: admin-notif-fade-in 0.2s ease-out;
+}
+
+@keyframes admin-notif-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.admin-notif__confirm {
+  background: var(--surface-card, #fff);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: admin-notif-scale-in 0.2s ease-out;
+}
+
+@keyframes admin-notif-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.admin-notif__confirm-message {
+  margin: 0 0 1.25rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text, #1a1a1a);
+}
+
+.admin-notif__confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.admin-notif__btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.admin-notif__btn:hover {
+  opacity: 0.9;
+}
+
+.admin-notif__btn--primary {
+  background: linear-gradient(135deg, var(--accent-teal, #0d9488) 0%, #0f766e 100%);
+  color: #fff;
+}
+
+.admin-notif__btn--secondary {
+  background: var(--surface, #f1f5f9);
+  color: var(--text, #334155);
+  border: 1px solid var(--border-soft, #e2e8f0);
+}

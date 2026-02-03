@@ -36,6 +36,7 @@ model Product {
   updatedAt   DateTime @updatedAt @map("updated_at")
   cartItems   CartItem[]
   likes       Like[]
+  orderItems  OrderItem[]
 
   @@map("products")
 }
@@ -72,4 +73,47 @@ model CartItem {
 
   @@unique([cartId, productId])
   @@map("cart_items")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  passwordHash     String    @map("password_hash")
+  name             String?
+  role             String    @default("user") // "user" | "admin"
+  preferredLocale  String?   @map("preferred_locale") // "vi" | "en"
+  createdAt        DateTime  @default(now()) @map("created_at")
+  orders           Order[]
+
+  @@map("users")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  sessionId       String      @map("session_id")
+  userId          String?     @map("user_id")
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  total           Int         // tổng tiền tại thời điểm đặt (đơn vị nhỏ nhất, e.g. VND)
+  currency        String      @default("VND")
+  paymentMethod   String      @map("payment_method") // "card", "cod", ...
+  shippingAddress String?     @map("shipping_address")
+  phone           String?
+  status          String      @default("completed") // "completed", "pending", ...
+  createdAt       DateTime    @default(now()) @map("created_at")
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  orderId      String   @map("order_id")
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String   @map("product_id")
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity     Int
+  priceAtOrder Int      @map("price_at_order") // giá tại thời điểm đặt (snapshot)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("order_items")
 }
