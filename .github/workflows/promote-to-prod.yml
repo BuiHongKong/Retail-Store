@@ -1,0 +1,25 @@
+# Manual: đẩy nhánh main của repo này sang prod repo. Sau đó vào prod repo chạy workflow "Deploy to Prod".
+name: Promote to Prod Repo
+on:
+  workflow_dispatch:
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to prod repo
+        env:
+          PROD_REPO_URL: ${{ vars.PROD_REPO_URL }}
+          TOKEN: ${{ secrets.PROD_REPO_TOKEN }}
+        run: |
+          if [ -z "$PROD_REPO_URL" ] || [ -z "$TOKEN" ]; then
+            echo "Set vars.PROD_REPO_URL (e.g. https://github.com/owner/retail-store-prod) and secrets.PROD_REPO_TOKEN (PAT with repo push)."
+            exit 1
+          fi
+          TARGET="${PROD_REPO_URL#https://}"
+          git push "https://x-access-token:${TOKEN}@${TARGET}.git" main:main --force
+          echo "Pushed main to prod repo. Go to prod repo and run workflow 'Deploy to Prod'."

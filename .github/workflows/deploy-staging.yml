@@ -1,0 +1,63 @@
+name: Deploy to Staging
+on:
+  push:
+    branches: [main]
+jobs:
+  build-and-deploy-staging:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      ECR_FRONTEND: ${{ vars.ECR_FRONTEND_STAGING || 'retail-store-frontend-staging' }}
+      ECR_BACKEND: ${{ vars.ECR_BACKEND_STAGING || 'retail-store-backend-staging' }}
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER_STAGING || 'retail-staging' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+          echo "registry=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com" >> $GITHUB_OUTPUT
+
+      - name: Build and push backend
+        run: |
+          REGISTRY=${{ steps.ecr.outputs.registry }}
+          REPO=$ECR_BACKEND
+          docker build -t $REGISTRY/$REPO:staging-${{ github.sha }} -t $REGISTRY/$REPO:staging-latest -f backend/Dockerfile backend/
+          docker push $REGISTRY/$REPO:staging-${{ github.sha }}
+          docker push $REGISTRY/$REPO:staging-latest
+          echo "BACKEND_IMAGE=$REGISTRY/$REPO:staging-${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build and push frontend
+        run: |
+          REGISTRY=${{ steps.ecr.outputs.registry }}
+          REPO=$ECR_FRONTEND
+          docker build -t $REGISTRY/$REPO:staging-${{ github.sha }} -t $REGISTRY/$REPO:staging-latest -f frontend/Dockerfile frontend/
+          docker push $REGISTRY/$REPO:staging-${{ github.sha }}
+          docker push $REGISTRY/$REPO:staging-latest
+          echo "FRONTEND_IMAGE=$REGISTRY/$REPO:staging-${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Deploy backend services to ECS staging
+        run: |
+          for svc in main cart checkout auth admin; do
+            aws ecs update-service --cluster $ECS_CLUSTER --service $svc --force-new-deployment --region $AWS_REGION --output text --query 'service.serviceName' || true
+          done
+
+      - name: Deploy frontend to ECS staging
+        run: |
+          aws ecs update-service --cluster $ECS_CLUSTER --service frontend --force-new-deployment --region $AWS_REGION --output text --query 'service.serviceName'
+
+      - name: Summary
+        run: |
+          echo "## Staging deploy done" >> $GITHUB_STEP_SUMMARY
+          echo "Backend image: ${{ env.BACKEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "Frontend image: ${{ env.FRONTEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "Staging URL: see Terraform output staging_url or AWS Console ALB/CloudFront." >> $GITHUB_STEP_SUMMARY
