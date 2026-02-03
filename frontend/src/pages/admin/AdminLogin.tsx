@@ -62,7 +62,7 @@ export function AdminLoginPage() {
               className="auth-page__input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder={t("admin.login.password")}
               autoComplete="current-password"
               required
             />
