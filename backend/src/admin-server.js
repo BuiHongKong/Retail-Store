@@ -8,6 +8,8 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 app.use(express.json());
 
+app.get("/health", (req, res) => res.sendStatus(200));
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (CORS_ORIGIN) {

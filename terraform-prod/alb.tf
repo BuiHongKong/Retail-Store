@@ -47,7 +47,7 @@ resource "aws_lb_target_group" "backend" {
   vpc_id   = aws_vpc.main.id
   target_type = "ip"
   health_check {
-    path                = each.value.name == "main" ? "/api/products" : "/api/admin/status"
+    path                = "/health"
     healthy_threshold   = 2
     unhealthy_threshold = 3
     timeout             = 5
