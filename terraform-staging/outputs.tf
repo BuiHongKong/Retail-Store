@@ -37,3 +37,13 @@ output "rds_endpoint" {
   description = "RDS endpoint (if created)"
   value       = var.create_rds && length(aws_db_instance.main) > 0 ? aws_db_instance.main[0].address : null
 }
+
+output "ecs_subnet_ids" {
+  description = "Subnet IDs for ECS run-task (seed)"
+  value       = local.ecs_subnet_ids
+}
+
+output "ecs_security_group_id" {
+  description = "Security group for ECS run-task (seed)"
+  value       = aws_security_group.ecs.id
+}
