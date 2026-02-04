@@ -74,7 +74,6 @@ resource "aws_ecs_task_definition" "frontend" {
       options = {
         "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-frontend"
         "awslogs-region"        = var.aws_region
-        "awslogs-create-group"  = "false"
         "awslogs-stream-prefix" = "frontend"
       }
     }
@@ -125,7 +124,6 @@ resource "aws_ecs_task_definition" "backend" {
       options = {
         "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-${each.value.name}"
         "awslogs-region"        = var.aws_region
-        "awslogs-create-group"  = "false"
         "awslogs-stream-prefix" = each.value.name
       }
     }
