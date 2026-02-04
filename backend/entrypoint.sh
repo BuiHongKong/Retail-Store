@@ -3,6 +3,9 @@ set -e
 SERVICE="${SERVICE:-main}"
 PORT="${PORT:-3000}"
 
+# Run migrations on startup (idempotent, safe for multiple containers)
+npx prisma migrate deploy
+
 case "$SERVICE" in
   main)    exec node src/index.js ;;
   cart)    exec node src/cart-server.js ;;
