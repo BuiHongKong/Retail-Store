@@ -9,7 +9,7 @@ jobs:
       AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
       ECR_FRONTEND: ${{ vars.ECR_FRONTEND_STAGING || 'retail-store-frontend-staging' }}
       ECR_BACKEND: ${{ vars.ECR_BACKEND_STAGING || 'retail-store-backend-staging' }}
-      ECS_CLUSTER: ${{ vars.ECS_CLUSTER_STAGING || 'retail-staging' }}
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER_STAGING || 'retail-store-staging' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
