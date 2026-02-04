@@ -11,12 +11,9 @@ vpc_cidr = "10.1.0.0/16"
 # NAT Gateway: true = ECS trong private subnet (tốn ~32 USD/tháng); false = ECS trong public subnet
 enable_nat_gateway = false
 
-# RDS: false nếu dùng DB ngoài (Neon, Supabase). Khi true cần db_password.
+# RDS (AWS): Project dùng RDS PostgreSQL.
 create_rds  = true
 db_password = "YOUR_SAFE_PASSWORD_FOR_PROD"
-
-# Hoặc dùng DB ngoài (Neon/Supabase), set create_rds = false và:
-# database_url = "postgresql://user:pass@host:5432/retail_store"
 
 # JWT — BẮT BUỘC đổi khác staging trong production
 # jwt_secret      = "..."

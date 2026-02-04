@@ -29,13 +29,13 @@ variable "enable_nat_gateway" {
 }
 
 variable "create_rds" {
-  description = "Create RDS PostgreSQL (set false to use external DB e.g. Neon)"
+  description = "Create AWS RDS PostgreSQL. Project dùng RDS."
   type        = bool
   default     = true
 }
 
 variable "db_password" {
-  description = "RDS master password (set via TF_VAR_db_password or -var). Required if create_rds = true."
+  description = "RDS master password. Bắt buộc khi create_rds = true. Set qua TF_VAR_db_password hoặc terraform.tfvars."
   type        = string
   sensitive   = true
   default     = ""
@@ -54,7 +54,7 @@ variable "ecr_backend_name" {
 }
 
 variable "database_url" {
-  description = "Override DATABASE_URL for backend (if not using RDS, e.g. Neon). Leave empty when create_rds = true."
+  description = "Chỉ dùng khi create_rds = false (DB ngoài). Khi dùng RDS thì để trống."
   type        = string
   sensitive   = true
   default     = ""
