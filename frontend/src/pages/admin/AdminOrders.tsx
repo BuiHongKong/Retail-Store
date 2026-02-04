@@ -60,7 +60,7 @@ export function AdminOrdersPage() {
       if ("deleted" in result && result.deleted) {
         setOrders((prev) => prev.filter((o) => o.id !== result.id));
       } else {
-        setOrders((prev) => prev.map((o) => (o.id === orderId ? result : o)));
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? (result as AdminOrder) : o)));
       }
     } catch (e) {
       showToast(e instanceof Error ? e.message : t("admin.orders.updateError"), "error");
