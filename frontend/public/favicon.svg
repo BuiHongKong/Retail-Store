@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 2 24 24" fill="none">
+  <!-- Đầu kì lân (mặt) -->
+  <ellipse cx="16" cy="15" rx="8" ry="9" fill="#fff5f8" stroke="#e8b4d4" stroke-width="1"/>
+  <!-- Sừng kì lân -->
+  <path d="M16 6 L17 4 L18 2 L19 4 L20 6 L16 14 Z" fill="#ffd700" stroke="#daa520" stroke-width="0.8"/>
+  <!-- Tai -->
+  <path d="M9 10 L7 4 L10 9 Z" fill="#fff5f8" stroke="#e8b4d4" stroke-width="0.8"/>
+  <path d="M23 10 L25 4 L22 9 Z" fill="#fff5f8" stroke="#e8b4d4" stroke-width="0.8"/>
+  <!-- Mắt -->
+  <circle cx="12" cy="14" r="1.8" fill="#2d1b2e"/>
+  <circle cx="20" cy="14" r="1.8" fill="#2d1b2e"/>
+  <circle cx="12.5" cy="13.2" r="0.5" fill="#fff"/>
+  <circle cx="20.5" cy="13.2" r="0.5" fill="#fff"/>
+  <!-- Mũi -->
+  <ellipse cx="16" cy="19" rx="2" ry="1.5" fill="#f5c6d9"/>
+  <!-- Bờm (tóc) -->
+  <path d="M8 12 Q6 8 8 6 Q10 10 9 14" stroke="#e8b4d4" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M24 12 Q26 8 24 6 Q22 10 23 14" stroke="#e8b4d4" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
