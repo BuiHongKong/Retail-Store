@@ -11,7 +11,7 @@ jobs:
   rollback:
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
       ECS_CLUSTER: ${{ vars.ECS_CLUSTER_PROD || 'retail-prod' }}
     steps:
       - uses: actions/checkout@v4
