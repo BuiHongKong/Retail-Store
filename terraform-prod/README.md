@@ -2,7 +2,7 @@
 
 Infrastructure cho môi trường **production**: VPC, ECR, ALB, ECS Fargate, RDS (optional).
 
-Tách biệt hoàn toàn với `terraform/` (staging). State riêng, tài nguyên riêng.
+Tách biệt hoàn toàn với `terraform-staging/` (staging). State riêng, tài nguyên riêng.
 
 ## Region
 
@@ -52,5 +52,5 @@ Mặc định **ap-southeast-1** (Singapore). Đổi trong `variables.tf` hoặc
 
 **Quan trọng:** State prod phải tách với staging.
 
-- **Local:** Chạy từ thư mục `terraform-prod/` — file `terraform.tfstate` nằm trong folder này, không trùng với `terraform/`.
+- **Local:** Chạy từ thư mục `terraform-prod/` — file `terraform.tfstate` nằm trong folder này, không trùng với `terraform-staging/`.
 - **S3:** Nếu dùng backend S3, đặt `key = "prod/terraform.tfstate"` (staging dùng `staging/terraform.tfstate`).

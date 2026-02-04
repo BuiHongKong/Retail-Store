@@ -76,7 +76,7 @@ resource "aws_ecs_task_definition" "frontend" {
 
 # Backend task definition (one per service: env SERVICE + PORT)
 locals {
-  backend_services = [
+  ecs_backend_services = [
     { name = "main", port = 3000, env = [{ name = "SERVICE", value = "main" }, { name = "PORT", value = "3000" }] },
     { name = "cart", port = 3001, env = [{ name = "SERVICE", value = "cart" }, { name = "CART_PORT", value = "3001" }] },
     { name = "checkout", port = 3002, env = [{ name = "SERVICE", value = "checkout" }, { name = "CHECKOUT_PORT", value = "3002" }] },
@@ -86,7 +86,7 @@ locals {
 }
 
 resource "aws_ecs_task_definition" "backend" {
-  for_each                 = { for s in local.backend_services : s.name => s }
+  for_each                 = { for s in local.ecs_backend_services : s.name => s }
   family                   = "${var.project_name}-${var.environment}-${each.value.name}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -140,7 +140,7 @@ resource "aws_ecs_service" "frontend" {
 }
 
 resource "aws_ecs_service" "backend" {
-  for_each        = { for s in local.backend_services : s.name => s }
+  for_each        = { for s in local.ecs_backend_services : s.name => s }
   name            = each.value.name
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.backend[each.value.name].arn

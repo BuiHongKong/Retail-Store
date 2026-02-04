@@ -19,7 +19,7 @@ Repo hiện tại là **Staging repo**. Khi merge vào `main` thì tự động 
 
 ### 2.1 Terraform (Staging)
 
-Trong repo có sẵn thư mục **terraform/** (region mặc định **ap-southeast-1**): VPC, ECR, ALB, ECS Fargate, RDS (optional). Chạy `terraform apply` trước khi cấu hình GitHub. Chi tiết: [terraform/README.md](../terraform/README.md).
+Trong repo có sẵn thư mục **terraform-staging/** (region mặc định **ap-southeast-1**): VPC, ECR, ALB, ECS Fargate, RDS (optional). Chạy `terraform apply` trước khi cấu hình GitHub. Chi tiết: [terraform-staging/README.md](../terraform-staging/README.md).
 
 ### 2.2 AWS (Staging)
 
@@ -81,7 +81,7 @@ Staging deploy tự động khi push/merge vào `main`. Cần chuẩn bị một
 
 | Bước | Hành động | Ghi chú |
 |------|-----------|--------|
-| 1 | **Terraform**: Vào `terraform/`, cấu hình `terraform.tfvars` (copy từ `terraform.tfvars.example`), chạy `terraform init` rồi `terraform apply` | Tạo VPC, ECR, ECS, ALB, RDS (xem [terraform/README.md](../terraform/README.md)). |
+| 1 | **Terraform**: Vào `terraform-staging/`, cấu hình `terraform.tfvars` (copy từ `terraform.tfvars.example`), chạy `terraform init` rồi `terraform apply` | Tạo VPC, ECR, ECS, ALB, RDS (xem [terraform-staging/README.md](../terraform-staging/README.md)). |
 | 2 | **GitHub Secrets** (repo này): Thêm `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ACCOUNT_ID` | IAM user cần quyền ECR push, ECS update-service. |
 | 3 | **GitHub Variables** (repo này): Thêm `AWS_REGION` (vd `ap-southeast-1`). Tuỳ chọn: `ECR_FRONTEND_STAGING`, `ECR_BACKEND_STAGING`, `ECS_CLUSTER_STAGING` nếu khác mặc định | |
 | 4 | **Push/merge vào `main`** | Workflow "Deploy to Staging" chạy: build Docker → push ECR → update ECS. |

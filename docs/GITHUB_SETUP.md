@@ -63,7 +63,7 @@ Settings → Secrets and variables → Actions.
 ## 5. Terraform Staging
 
 ```bash
-cd terraform
+cd terraform-staging
 cp terraform.tfvars.example terraform.tfvars
 # Sửa terraform.tfvars: db_password
 terraform init

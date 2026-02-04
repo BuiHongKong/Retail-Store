@@ -1,5 +1,5 @@
 # Copy to terraform.tfvars và điền giá trị. Không commit terraform.tfvars (có secret).
-# PROD — state tách với terraform/ (staging).
+# PROD — state tách với terraform-staging/ (staging).
 
 aws_region   = "ap-southeast-1"
 environment  = "prod"

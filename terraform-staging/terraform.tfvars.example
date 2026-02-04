@@ -11,10 +11,6 @@ enable_nat_gateway = false
 create_rds  = true
 db_password = "YOUR_SAFE_PASSWORD"
 
-# JWT (đổi trong production)
-# jwt_secret      = "..."
-# admin_jwt_secret = "..."
-
-# ECR names (phải khớp với GitHub Actions vars)
-# ecr_frontend_name = "retail-store-frontend-staging"
-# ecr_backend_name  = "retail-store-backend-staging"
+# JWT (lấy từ backend/.env hoặc tạo mới)
+jwt_secret       = "YOUR_JWT_SECRET"
+admin_jwt_secret = "YOUR_ADMIN_JWT_SECRET"
