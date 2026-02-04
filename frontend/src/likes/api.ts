@@ -1,5 +1,4 @@
 import type { LikesResponse } from "./types";
-import type { Product } from "../product/types";
 
 const API_BASE = "/api";
 const SESSION_HEADER = "x-likes-session";

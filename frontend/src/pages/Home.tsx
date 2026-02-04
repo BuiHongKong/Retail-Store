@@ -59,7 +59,7 @@ export function HomePage({ onReadyChange }: HomePageProps) {
     return () => {
       cancelled = true;
     };
-  }, [onReadyChange]);
+  }, [onReadyChange, t]);
 
   useEffect(() => {
     onReadyChange?.(!loading);

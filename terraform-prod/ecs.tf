@@ -63,6 +63,7 @@ resource "aws_ecs_task_definition" "frontend" {
         "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-frontend"
         "awslogs-region"        = var.aws_region
         "awslogs-create-group"  = "true"
+        "awslogs-stream-prefix" = "frontend"
       }
     }
     healthCheck = {
@@ -113,6 +114,7 @@ resource "aws_ecs_task_definition" "backend" {
         "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-${each.value.name}"
         "awslogs-region"        = var.aws_region
         "awslogs-create-group"  = "true"
+        "awslogs-stream-prefix" = each.value.name
       }
     }
   }])

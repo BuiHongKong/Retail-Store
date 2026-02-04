@@ -28,7 +28,7 @@ export function AdminCategoriesPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- load on mount only
 
   const resetForm = () => {
     setForm({ slug: "", name: "", description: "", sortOrder: categories.length });

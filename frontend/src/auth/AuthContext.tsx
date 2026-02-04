@@ -67,22 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const loadUser = useCallback(async () => {
-    if (!authRequired) return;
-    const token = getStoredToken();
-    if (!token) {
-      setUser(null);
-      return;
-    }
-    try {
-      const u = await getMe();
-      setUser(u);
-      applyUserLocale(u);
-    } catch {
-      setUser(null);
-    }
-  }, [authRequired]);
-
   const login = useCallback(async (email: string, password: string) => {
     const { user: u } = await apiLogin(email, password);
     setUser(u);
