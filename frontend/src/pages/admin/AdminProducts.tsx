@@ -61,7 +61,7 @@ export function AdminProductsPage() {
 
   useEffect(() => {
     load();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- load on mount only
 
   const resetForm = () => {
     setForm({ ...defaultForm, categoryId: categories[0]?.id ?? "" });
