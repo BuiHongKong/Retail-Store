@@ -4,6 +4,7 @@
 }
 
 .app__cart-trigger {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,6 +22,14 @@
 .app__cart-trigger:hover {
   background: var(--border-soft);
   color: var(--accent-teal);
+  transform: none;
+}
+
+.app__cart-trigger svg {
+  display: block;
+  flex-shrink: 0;
+  /* Căn giữa icon (cart SVG có shape lệch trái, nudge nhẹ sang phải) */
+  transform: translateX(-2px);
 }
 
 .app__cart-badge {

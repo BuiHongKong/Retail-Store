@@ -69,7 +69,7 @@ export function RegisterPage() {
               className="auth-page__input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder={t("store.auth.password")}
               autoComplete="new-password"
               required
               minLength={6}

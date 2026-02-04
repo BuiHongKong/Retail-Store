@@ -306,6 +306,14 @@ Frontend đã cấu hình proxy: request tới `/api`, `/api/cart`, `/api/checko
 
 ---
 
+## Staging / Production và CI/CD
+
+Repo này là **Staging repo**: merge vào `main` sẽ tự động build và deploy lên môi trường staging (AWS ECS). Production dùng repo riêng; promote thủ công rồi deploy và rollback trong prod repo.
+
+**Hướng dẫn chi tiết:** [docs/STAGING_PROD.md](docs/STAGING_PROD.md) — flow 2 repo, cấu hình GitHub Secrets/Variables, ECR/ECS, promote, deploy prod, rollback.
+
+---
+
 ## API nhanh (tham khảo)
 
 - **Product:** GET `/api/products`, GET `/api/products/:slug`, GET `/api/categories`

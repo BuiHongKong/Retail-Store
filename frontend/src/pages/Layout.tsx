@@ -10,10 +10,6 @@ export function Layout() {
   const { t } = useTranslation();
   const location = useLocation();
   const { user, loading: authLoading, authRequired, logout } = useAuth();
-  const isLoginOrRegister = location.pathname === "/login" || location.pathname === "/register";
-  if (!authLoading && authRequired && !user && !isLoginOrRegister) {
-    return <Navigate to="/login" replace />;
-  }
   const [cartOpen, setCartOpen] = useState(false);
   const cartTriggerRef = useRef<HTMLButtonElement>(null);
   const cartDropdownRef = useRef<HTMLDivElement>(null);
@@ -50,6 +46,11 @@ export function Layout() {
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, [likesOpen]);
+
+  const isLoginOrRegister = location.pathname === "/login" || location.pathname === "/register";
+  if (!authLoading && authRequired && !user && !isLoginOrRegister) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <main className="app">
