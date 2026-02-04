@@ -25,6 +25,7 @@ Mặc định **ap-southeast-1** (Singapore). Đổi trong `variables.tf` hoặc
    terraform apply
    ```
 4. Sau khi apply: lấy **staging_url** từ output (`terraform output staging_url`). Cấu hình GitHub Secrets/Variables theo [docs/STAGING_PROD.md](../docs/STAGING_PROD.md) (AWS_ACCOUNT_ID, ECS cluster name, v.v.).
+5. **Seed DB**: Chạy tự động trong GitHub Actions (Deploy to Staging) mỗi khi push lên main. User demo: `demo@example.com` / `demo123`, Admin: `admin@example.com` / `admin123`.
 
 ## Biến quan trọng
 

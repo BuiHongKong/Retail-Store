@@ -51,6 +51,19 @@ jobs:
             aws ecs update-service --cluster $ECS_CLUSTER --service $svc --force-new-deployment --region $AWS_REGION --output text --query 'service.serviceName' || true
           done
 
+      - name: Run DB seed (demo user + admin)
+        run: |
+          NETWORK=$(aws ecs describe-services --cluster $ECS_CLUSTER --services main --region $AWS_REGION --query 'services[0].networkConfiguration' --output json 2>/dev/null || echo "{}")
+          if [ "$NETWORK" != "{}" ] && [ -n "$NETWORK" ]; then
+            TASK_ARN=$(aws ecs run-task --cluster $ECS_CLUSTER --task-definition ${ECS_CLUSTER}-main \
+              --launch-type FARGATE --network-configuration "$NETWORK" --region $AWS_REGION \
+              --overrides '{"containerOverrides":[{"name":"main","command":["npx","prisma","db","seed"]}]}' \
+              --query 'tasks[0].taskArn' --output text 2>/dev/null || echo "")
+            if [ -n "$TASK_ARN" ]; then
+              echo "Seed task started: $TASK_ARN"
+            fi
+          fi
+
       - name: Deploy frontend to ECS staging
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER --service frontend --force-new-deployment --region $AWS_REGION --output text --query 'service.serviceName'
