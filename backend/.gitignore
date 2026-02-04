@@ -1,3 +1,15 @@
 node_modules
-.env
 uploads
+
+# Sensitive / env
+.env
+.env.*
+.env.local
+.env.*.local
+!.env.example
+
+# Keys, secrets
+*.pem
+*.key
+secrets/
+.secrets
