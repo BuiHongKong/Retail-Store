@@ -25,7 +25,7 @@ Mặc định **ap-southeast-1** (Singapore). Đổi trong `variables.tf` hoặc
    terraform apply
    ```
 4. Sau khi apply: lấy **staging_url** từ output (`terraform output staging_url`). Cấu hình GitHub Secrets/Variables theo [docs/STAGING_PROD.md](../docs/STAGING_PROD.md) (AWS_ACCOUNT_ID, ECS cluster name, v.v.).
-5. **Seed DB (một lần)**: Chạy `.\run-seed-once.ps1` trong `terraform-staging/` để tạo user demo (`demo@example.com` / `demo123`) và admin (`admin@example.com` / `admin123`). Sau đó không cần chạy lại.
+5. **Seed DB (một lần)**: Trong `terraform-staging/` chạy `bash run-seed-once.sh` (Git Bash). Cần `jq`. User demo: `demo@example.com` / `demo123`, Admin: `admin@example.com` / `admin123`.
 
 ## Biến quan trọng
 
