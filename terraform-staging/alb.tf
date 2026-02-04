@@ -153,9 +153,9 @@ resource "aws_lb_listener_rule" "api_main" {
   }
   condition {
     path_pattern {
-      values = ["/api*", "/uploads*", "/assets*"]
+      values = ["/api*", "/uploads*"]
     }
   }
 }
 
-# Default / stays on frontend (listener default_action)
+# /assets* stays on frontend (default_action) — JS/CSS from Vite build
