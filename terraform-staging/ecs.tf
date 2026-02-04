@@ -9,6 +9,18 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
+# CloudWatch log groups (ECS execution role lacks CreateLogGroup)
+resource "aws_cloudwatch_log_group" "frontend" {
+  name              = "/ecs/${var.project_name}-${var.environment}-frontend"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_group" "backend" {
+  for_each          = { for s in local.ecs_backend_services : s.name => s }
+  name              = "/ecs/${var.project_name}-${var.environment}-${each.value.name}"
+  retention_in_days = 7
+}
+
 # Task execution role (ECR pull, CloudWatch logs)
 data "aws_iam_policy_document" "ecs_execution" {
   statement {
@@ -61,7 +73,7 @@ resource "aws_ecs_task_definition" "frontend" {
       options = {
         "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-frontend"
         "awslogs-region"        = var.aws_region
-        "awslogs-create-group"  = "true"
+        "awslogs-create-group"  = "false"
         "awslogs-stream-prefix" = "frontend"
       }
     }
@@ -112,7 +124,7 @@ resource "aws_ecs_task_definition" "backend" {
       options = {
         "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-${each.value.name}"
         "awslogs-region"        = var.aws_region
-        "awslogs-create-group"  = "true"
+        "awslogs-create-group"  = "false"
         "awslogs-stream-prefix" = each.value.name
       }
     }
