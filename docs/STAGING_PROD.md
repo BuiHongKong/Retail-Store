@@ -37,7 +37,7 @@ Trong repo có sẵn thư mục **terraform-staging/** (region mặc định **a
 
 **Variables (Settings → Variables):**
 
-- `AWS_REGION`: vd `us-east-1`.
+- `AWS_REGION`: vd `ap-southeast-1`.
 - (Tuỳ chọn) `ECR_FRONTEND_STAGING`, `ECR_BACKEND_STAGING`: tên ECR repo nếu khác mặc định.
 - (Tuỳ chọn) `ECS_CLUSTER_STAGING`: tên ECS cluster staging.
 

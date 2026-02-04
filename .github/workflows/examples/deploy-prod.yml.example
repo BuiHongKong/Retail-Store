@@ -7,7 +7,7 @@ jobs:
   deploy-prod:
     runs-on: ubuntu-latest
     env:
-      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
       ECR_FRONTEND: ${{ vars.ECR_FRONTEND_PROD }}
       ECR_BACKEND: ${{ vars.ECR_BACKEND_PROD }}
       ECS_CLUSTER: ${{ vars.ECS_CLUSTER_PROD || 'retail-prod' }}
