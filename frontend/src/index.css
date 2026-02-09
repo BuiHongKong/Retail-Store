@@ -106,3 +106,13 @@ button:focus-visible {
   color: #fff;
   border-color: var(--accent-teal);
 }
+
+@media (max-width: 640px) {
+  .language-switcher {
+    gap: 0.15rem;
+  }
+  .language-switcher__btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+}

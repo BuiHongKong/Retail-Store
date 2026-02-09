@@ -186,3 +186,30 @@
   background: rgba(var(--accent-coral-rgb), 0.15);
   color: var(--accent-coral);
 }
+
+@media (max-width: 640px) {
+  .app__likes-dropdown {
+    width: min(100vw - 1rem, 360px);
+    max-height: 60vh;
+    right: -0.5rem;
+  }
+  .app__likes-trigger {
+    width: 40px;
+    height: 40px;
+  }
+  .app__likes-trigger svg {
+    width: 24px;
+    height: 24px;
+  }
+  .app__likes-item {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  .app__likes-item-img {
+    width: 40px;
+    height: 40px;
+  }
+  .app__likes-item-name {
+    font-size: 0.85rem;
+  }
+}

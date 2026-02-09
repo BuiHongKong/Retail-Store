@@ -175,6 +175,13 @@
   background: var(--surface);
 }
 
+.admin-products__table td:last-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
 .admin-products__edit-btn {
   padding: 0.35rem 0.65rem;
   font-size: 0.8rem;
@@ -210,4 +217,55 @@
 .admin-products__delete-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .admin-products__header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .admin-products__title {
+    font-size: 1.25rem;
+  }
+  .admin-products__form {
+    max-width: none;
+    padding: 1rem;
+  }
+  .admin-products__row .admin-products__field {
+    min-width: 100%;
+  }
+  .admin-products__table th,
+  .admin-products__table td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-products__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .admin-products__form {
+    padding: 0.875rem;
+  }
+  .admin-products__image-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admin-products__table th,
+  .admin-products__table td {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  .admin-products__thumb {
+    width: 36px;
+    height: 36px;
+  }
+  .admin-products__edit-btn,
+  .admin-products__delete-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
 }

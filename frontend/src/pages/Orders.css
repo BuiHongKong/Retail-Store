@@ -190,3 +190,39 @@
 .orders__back:hover {
   color: var(--accent-teal);
 }
+
+@media (max-width: 640px) {
+  .orders {
+    padding: 1.25rem 1rem;
+  }
+  .orders__title {
+    font-size: 1.4rem;
+  }
+  .orders__card-header {
+    flex-wrap: wrap;
+    padding: 0.875rem 1rem;
+  }
+  .orders__card-body {
+    padding: 0 1rem 1rem;
+  }
+  .orders__item {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .orders__item-img {
+    width: 40px;
+    height: 40px;
+  }
+  .orders__item-name {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .orders {
+    padding: 1rem 0.75rem;
+  }
+  .orders__card {
+    border-radius: 12px;
+  }
+}

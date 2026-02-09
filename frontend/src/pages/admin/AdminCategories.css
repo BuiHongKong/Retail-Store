@@ -143,3 +143,42 @@
 .admin-categories__edit-btn:hover {
   background: rgba(var(--accent-teal-rgb), 0.1);
 }
+
+@media (max-width: 768px) {
+  .admin-categories__header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .admin-categories__title {
+    font-size: 1.25rem;
+  }
+  .admin-categories__form {
+    max-width: none;
+    padding: 1rem;
+  }
+  .admin-categories__table th,
+  .admin-categories__table td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-categories__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .admin-categories__form {
+    padding: 0.875rem;
+  }
+  .admin-categories__table th,
+  .admin-categories__table td {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  .admin-categories__edit-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}

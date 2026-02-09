@@ -122,3 +122,21 @@
   color: #fff;
   border-color: var(--accent-pink);
 }
+
+@media (max-width: 768px) {
+  .product-filter {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .product-filter {
+    padding: 0.875rem;
+  }
+  .product-filter__title {
+    font-size: 0.95rem;
+  }
+}

@@ -162,3 +162,24 @@
 .product-card__add-cart:active {
   filter: brightness(0.88);
 }
+
+@media (max-width: 640px) {
+  .product-card {
+    max-width: none;
+    max-height: none;
+  }
+  .product-card__body {
+    padding: 1rem 1rem 1.25rem;
+  }
+  .product-card__name {
+    font-size: 1.1rem;
+  }
+  .product-card__like svg {
+    width: 24px;
+    height: 24px;
+  }
+  .product-card__like {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+}

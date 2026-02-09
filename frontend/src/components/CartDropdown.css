@@ -265,3 +265,26 @@
   font-weight: 700;
   color: var(--price-color);
 }
+
+@media (max-width: 640px) {
+  .app__cart-dropdown {
+    width: min(100vw - 1rem, 360px);
+    max-height: 60vh;
+    right: -0.5rem;
+  }
+  .app__cart-trigger {
+    width: 40px;
+    height: 40px;
+  }
+  .app__cart-item {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+  .app__cart-item-img {
+    width: 40px;
+    height: 40px;
+  }
+  .app__cart-item-name {
+    font-size: 0.85rem;
+  }
+}
