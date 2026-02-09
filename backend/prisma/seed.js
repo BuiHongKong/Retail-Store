@@ -17,12 +17,7 @@ const categoriesSeed = [
 ];
 
 async function main() {
-  console.log("[SEED] START");
-  const productCount = await prisma.product.count();
-  if (productCount > 0) {
-    console.log("[SEED] SKIPPED (products already exist, count=" + productCount + ")");
-    return;
-  }
+  console.log("[SEED] START (full reset, run data from scratch)");
 
   const productsPath = path.join(__dirname, "..", "data", "seed", "products.json");
   const raw = fs.readFileSync(productsPath, "utf-8");
@@ -36,6 +31,7 @@ async function main() {
   await prisma.cart.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
 
   for (const c of categoriesSeed) {
     await prisma.category.create({ data: c });
@@ -61,38 +57,26 @@ async function main() {
     });
   }
 
-  // User mặc định để dùng thử (khi bật auth service)
-  const existingUser = await prisma.user.findUnique({ where: { email: DEFAULT_USER_EMAIL } });
-  if (!existingUser) {
-    const passwordHash = await bcrypt.hash(DEFAULT_USER_PASSWORD, SALT_ROUNDS);
-    await prisma.user.create({
-      data: {
-        email: DEFAULT_USER_EMAIL,
-        passwordHash,
-        name: "Demo User",
-        role: "user",
-      },
-    });
-    console.log(`User mặc định đã tạo: ${DEFAULT_USER_EMAIL} / ${DEFAULT_USER_PASSWORD}`);
-  }
+  const passwordHash = await bcrypt.hash(DEFAULT_USER_PASSWORD, SALT_ROUNDS);
+  await prisma.user.create({
+    data: {
+      email: DEFAULT_USER_EMAIL,
+      passwordHash,
+      name: "Demo User",
+      role: "user",
+    },
+  });
+  const adminHash = await bcrypt.hash(ADMIN_PASSWORD, SALT_ROUNDS);
+  await prisma.user.create({
+    data: {
+      email: ADMIN_EMAIL,
+      passwordHash: adminHash,
+      name: "Admin",
+      role: "admin",
+    },
+  });
 
-  // Admin mặc định (khi bật admin service)
-  const existingAdmin = await prisma.user.findUnique({ where: { email: ADMIN_EMAIL } });
-  if (!existingAdmin) {
-    const adminHash = await bcrypt.hash(ADMIN_PASSWORD, SALT_ROUNDS);
-    await prisma.user.create({
-      data: {
-        email: ADMIN_EMAIL,
-        passwordHash: adminHash,
-        name: "Admin",
-        role: "admin",
-      },
-    });
-    console.log(`Admin mặc định đã tạo: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
-  }
-
-  const userCount = await prisma.user.count();
-  console.log("[SEED] COMPLETED categories=3 products=" + productsSeed.length + " users=" + userCount + " (demo@example.com, admin@example.com)");
+  console.log("[SEED] COMPLETED categories=3 products=" + productsSeed.length + " users=2 (" + DEFAULT_USER_EMAIL + ", " + ADMIN_EMAIL + ")");
 }
 
 main()
