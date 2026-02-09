@@ -74,7 +74,7 @@ export function HomePage({ onReadyChange }: HomePageProps) {
       <section className="app__hero" id="top">
         <div className="app__hero-wrap">
           <img
-            src="/assets/banner.png"
+            src="/api/assets/banner.png"
             alt="Banner"
             className="app__hero-banner"
           />
