@@ -34,4 +34,5 @@ app.use("/api", authRouter);
 app.listen(PORT, () => {
   console.log(`Auth API chạy tại http://localhost:${PORT}`);
   console.log(`Ví dụ: GET http://localhost:${PORT}/api/auth/status`);
+  console.log("[AUTH] CloudWatch log group: /ecs/retail-store-staging-auth — DB used for /api/auth, /api/orders");
 });

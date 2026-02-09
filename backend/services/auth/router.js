@@ -87,14 +87,18 @@ router.post("/auth/login", async (req, res) => {
       return res.status(400).json({ error: "email and password are required" });
     }
     const normalizedEmail = email.trim().toLowerCase();
+    console.log("[AUTH] login attempt email=" + normalizedEmail);
     const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (!user) {
+      console.log("[AUTH] login result=invalid (user not found)");
       return res.status(401).json({ error: "Invalid email or password" });
     }
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
+      console.log("[AUTH] login result=invalid (wrong password)");
       return res.status(401).json({ error: "Invalid email or password" });
     }
+    console.log("[AUTH] login result=success id=" + user.id);
     const token = createToken({ id: user.id, email: user.email });
     res.json({ token, user: toUserResponse(user) });
   } catch (err) {

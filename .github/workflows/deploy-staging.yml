@@ -78,12 +78,12 @@ jobs:
             --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=ENABLED}" \
             --overrides '{"containerOverrides":[{"name":"main","command":["npx","prisma","db","seed"]}]}' \
             --region $AWS_REGION
-          echo "Seed task started (skips if DB already has data). User: demo@example.com / demo123, Admin: admin@example.com / admin123"
+          echo "Seed task started. Logs: CloudWatch → /ecs/$ECS_CLUSTER-main (search [SEED])"
 
       - name: Summary
         run: |
           echo "## Staging deploy done" >> $GITHUB_STEP_SUMMARY
           echo "Backend image: ${{ env.BACKEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
           echo "Frontend image: ${{ env.FRONTEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
-          echo "Seed: run-task started (first deploy = seed, subsequent = skip)" >> $GITHUB_STEP_SUMMARY
+          echo "Seed: run-task started. **Logs on AWS:** CloudWatch → \`/ecs/${{ env.ECS_CLUSTER }}-main\` ([SEED]), \`/ecs/${{ env.ECS_CLUSTER }}-auth\` ([AUTH])" >> $GITHUB_STEP_SUMMARY
           echo "Staging URL: see Terraform output staging_url or AWS Console ALB." >> $GITHUB_STEP_SUMMARY

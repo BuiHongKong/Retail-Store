@@ -38,7 +38,7 @@ variable "db_password" {
   description = "RDS master password. Bắt buộc khi create_rds = true. Set qua TF_VAR_db_password hoặc terraform.tfvars."
   type        = string
   sensitive   = true
-  default     = "kongbui1994"
+  default     = "kongbui19994"
 }
 
 variable "ecr_frontend_name" {

@@ -17,9 +17,10 @@ const categoriesSeed = [
 ];
 
 async function main() {
+  console.log("[SEED] START");
   const productCount = await prisma.product.count();
   if (productCount > 0) {
-    console.log("Seed already done (products exist), skipping.");
+    console.log("[SEED] SKIPPED (products already exist, count=" + productCount + ")");
     return;
   }
 
@@ -90,7 +91,8 @@ async function main() {
     console.log(`Admin mặc định đã tạo: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
   }
 
-  console.log("Seed done: categories + products (+ user + admin mặc định nếu chưa có)");
+  const userCount = await prisma.user.count();
+  console.log("[SEED] COMPLETED categories=3 products=" + productsSeed.length + " users=" + userCount + " (demo@example.com, admin@example.com)");
 }
 
 main()
