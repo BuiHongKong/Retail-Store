@@ -14,6 +14,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+      - name: Lint frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run lint
+
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -55,9 +67,23 @@ jobs:
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER --service frontend --force-new-deployment --region $AWS_REGION --output text --query 'service.serviceName'
 
+      - name: Seed database (first deploy only)
+        run: |
+          SUBNETS=$(aws ecs describe-services --cluster $ECS_CLUSTER --services main --region $AWS_REGION --query 'services[0].networkConfiguration.awsvpcConfiguration.subnets' --output json | jq -r 'join(",")')
+          SG=$(aws ecs describe-services --cluster $ECS_CLUSTER --services main --region $AWS_REGION --query 'services[0].networkConfiguration.awsvpcConfiguration.securityGroups[0]' --output text)
+          aws ecs run-task \
+            --cluster $ECS_CLUSTER \
+            --task-definition "${ECS_CLUSTER}-main" \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=ENABLED}" \
+            --overrides '{"containerOverrides":[{"name":"main","command":["npx","prisma","db","seed"]}]}' \
+            --region $AWS_REGION
+          echo "Seed task started (skips if DB already has data). User: demo@example.com / demo123, Admin: admin@example.com / admin123"
+
       - name: Summary
         run: |
           echo "## Staging deploy done" >> $GITHUB_STEP_SUMMARY
           echo "Backend image: ${{ env.BACKEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
           echo "Frontend image: ${{ env.FRONTEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
-          echo "Staging URL: see Terraform output staging_url or AWS Console ALB/CloudFront." >> $GITHUB_STEP_SUMMARY
+          echo "Seed: run-task started (first deploy = seed, subsequent = skip)" >> $GITHUB_STEP_SUMMARY
+          echo "Staging URL: see Terraform output staging_url or AWS Console ALB." >> $GITHUB_STEP_SUMMARY

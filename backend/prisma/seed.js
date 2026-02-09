@@ -17,6 +17,12 @@ const categoriesSeed = [
 ];
 
 async function main() {
+  const productCount = await prisma.product.count();
+  if (productCount > 0) {
+    console.log("Seed already done (products exist), skipping.");
+    return;
+  }
+
   const productsPath = path.join(__dirname, "..", "data", "seed", "products.json");
   const raw = fs.readFileSync(productsPath, "utf-8");
   const productsSeed = JSON.parse(raw);
