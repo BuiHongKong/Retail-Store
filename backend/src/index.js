@@ -37,6 +37,9 @@ app.use("/assets", express.static(assetsPath));
 const uploadsPath = path.join(__dirname, "..", "uploads");
 app.use("/uploads", express.static(uploadsPath));
 
+// Ảnh sản phẩm (seed) tại /api/assets — ALB staging forward /api* tới main
+app.use("/api/assets", express.static(assetsPath));
+
 // API product + likes (Prisma + PostgreSQL). Cart, Checkout, Auth chạy service riêng (dev:cart, dev:checkout, dev:auth).
 app.use("/api", productRouter);
 
