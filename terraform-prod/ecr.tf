@@ -20,17 +20,17 @@ resource "aws_ecr_repository" "backend" {
   }
 }
 
-# Keep last 10 images for rollback
+# Keep last 3 images (prod-latest, prod-previous + buffer)
 resource "aws_ecr_lifecycle_policy" "frontend" {
   repository = aws_ecr_repository.frontend.name
   policy = jsonencode({
     rules = [{
       rulePriority = 1
-      description  = "Keep last 10 images"
+      description  = "Keep last 3 images"
       selection = {
         tagStatus   = "any"
         countType   = "imageCountMoreThan"
-        countNumber = 10
+        countNumber = 3
       }
       action = { type = "expire" }
     }]
@@ -42,11 +42,11 @@ resource "aws_ecr_lifecycle_policy" "backend" {
   policy = jsonencode({
     rules = [{
       rulePriority = 1
-      description  = "Keep last 10 images"
+      description  = "Keep last 3 images"
       selection = {
         tagStatus   = "any"
         countType   = "imageCountMoreThan"
-        countNumber = 10
+        countNumber = 3
       }
       action = { type = "expire" }
     }]

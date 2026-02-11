@@ -11,11 +11,11 @@
 3. Create repository.
 4. Local: `git remote add origin https://github.com/<owner>/Retail-Store.git` → `git push -u origin main`.
 
-### 1.2 Repo Prod (retail-store-prod)
+### 1.2 Repo Prod (Retail-Store-prod)
 
 1. GitHub → New repository.
-2. Name: `retail-store-prod`. Private. Không thêm README, .gitignore, license.
-3. Create repository.
+2. Name: `Retail-Store-prod`. Private. Không thêm README, .gitignore, license.
+3. Create repository. Ví dụ: https://github.com/BuiHongKong/Retail-Store-prod
 
 ---
 
@@ -34,17 +34,6 @@ Settings → Secrets and variables → Actions.
 | `AWS_ACCESS_KEY_ID` |
 | `AWS_SECRET_ACCESS_KEY` |
 | `AWS_ACCOUNT_ID` |
-| `PROD_REPO_TOKEN` |
-
-### Lấy PROD_REPO_TOKEN (GitHub)
-
-1. GitHub (tài khoản cá nhân) → Settings → Developer settings → Personal access tokens → Tokens (classic).
-2. Generate new token (classic).
-3. Note: `Retail-Store Promote to Prod`.
-4. Expiration: chọn thời hạn.
-5. Scope: chọn **repo** (full control).
-6. Generate token → copy token (chỉ hiện 1 lần).
-7. Repo Staging → Settings → Secrets → New repository secret → Name: `PROD_REPO_TOKEN`, Value: dán token.
 
 ---
 
@@ -56,7 +45,9 @@ Settings → Secrets and variables → Actions.
 | `ECR_FRONTEND_STAGING` | `retail-store-frontend-staging` |
 | `ECR_BACKEND_STAGING` | `retail-store-backend-staging` |
 | `ECS_CLUSTER_STAGING` | `retail-staging` |
-| `PROD_REPO_URL` | `https://github.com/<owner>/retail-store-prod` |
+| `ECR_FRONTEND_PROD` | `retail-store-frontend-prod` (cho job deploy prod trong staging) |
+| `ECR_BACKEND_PROD` | `retail-store-backend-prod` |
+| `ECS_CLUSTER_PROD` | `retail-store-prod` |
 
 ---
 
@@ -94,13 +85,13 @@ terraform apply
 
 Secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ACCOUNT_ID`
 
-Variables: `AWS_REGION` = `ap-southeast-1`, `ECR_FRONTEND_PROD` = `retail-store-frontend-prod`, `ECR_BACKEND_PROD` = `retail-store-backend-prod`, `ECS_CLUSTER_PROD` = `retail-prod`
+Variables: `AWS_REGION` = `ap-southeast-1`, `ECR_FRONTEND_PROD` = `retail-store-frontend-prod`, `ECR_BACKEND_PROD` = `retail-store-backend-prod`, `ECS_CLUSTER_PROD` = `retail-store-prod`
 
 ### 7.3 Repo Prod — Workflow
 
-Copy `.github/workflows/examples/deploy-prod.yml.example` từ Staging vào Prod thành `.github/workflows/deploy-prod.yml`. Commit, push.
+Copy `.github/workflows/for-prod-repo/rollback-prod.yml.example` từ Staging vào Prod thành `.github/workflows/rollback-prod.yml`. Commit, push. (Deploy prod chạy từ Staging repo sau khi Approve environment \`prod\`.)
 
 ### 7.4 Thực hiện
 
-1. Staging: Actions → Promote to Prod Repo → Run workflow.
-2. Prod: Actions → Deploy to Prod → Run workflow.
+1. Staging: Push/merge \`main\` → deploy staging chạy → Approve environment \`prod\` → deploy prod chạy.
+2. Khi cần rollback: Prod repo → Actions → Rollback Prod → Run workflow.

@@ -1,0 +1,42 @@
+# Copy vào prod repo thành .github/workflows/rollback-prod.yml (bỏ .example)
+# Chạy ở repo prod: Manual rollback về prod-previous (1 version back).
+name: Rollback Prod
+on:
+  workflow_dispatch:
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER_PROD || 'retail-store-prod' }}
+      TAG: prod-previous
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Rollback ECS services to prod-previous
+        run: |
+          set -e
+          echo "Rolling back all services to tag: $TAG (1 version back)"
+          for SVC in frontend main cart checkout auth admin; do
+            TF="${ECS_CLUSTER}-${SVC}"
+            echo "  → $SVC (task definition $TF)"
+            DEF=$(aws ecs describe-task-definition --task-definition "$TF" --region "$AWS_REGION" --query 'taskDefinition' --output json)
+            DEF=$(echo "$DEF" | jq 'del(.taskDefinitionArn, .revision, .status, .requiresAttributes, .compatibilities, .registeredAt, .registeredBy)')
+            DEF=$(echo "$DEF" | jq --arg tag "$TAG" '.containerDefinitions[0].image = ((.containerDefinitions[0].image | split(":")[0]) + ":" + $tag)')
+            echo "$DEF" > /tmp/td.json
+            NEW_ARN=$(aws ecs register-task-definition --cli-input-json file:///tmp/td.json --region "$AWS_REGION" --query 'taskDefinition.taskDefinitionArn' --output text)
+            aws ecs update-service --cluster "$ECS_CLUSTER" --service "$SVC" --task-definition "$NEW_ARN" --force-new-deployment --region "$AWS_REGION" --output text --query 'service.serviceName'
+          done
+          echo "Rollback to $TAG completed. ECS is deploying previous version."
+
+      - name: Summary
+        run: |
+          echo "## Rollback Prod completed" >> $GITHUB_STEP_SUMMARY
+          echo "All 6 services updated to **prod-previous** (1 version back)." >> $GITHUB_STEP_SUMMARY
+          echo "ECS will replace running tasks. Check ECS Console for deployment status." >> $GITHUB_STEP_SUMMARY

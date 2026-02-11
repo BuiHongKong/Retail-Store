@@ -87,3 +87,70 @@ jobs:
           echo "Frontend image: ${{ env.FRONTEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
           echo "Seed: run-task started. **Logs on AWS:** CloudWatch → \`/ecs/${{ env.ECS_CLUSTER }}-main\` ([SEED]), \`/ecs/${{ env.ECS_CLUSTER }}-auth\` ([AUTH])" >> $GITHUB_STEP_SUMMARY
           echo "Staging URL: see Terraform output staging_url or AWS Console ALB." >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "**Deploy to Prod:** Bấm **Review deployments** (environment \`prod\`) rồi **Approve** để deploy lên production." >> $GITHUB_STEP_SUMMARY
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy-staging]
+    environment: prod
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
+      ECR_FRONTEND: ${{ vars.ECR_FRONTEND_PROD || 'retail-store-frontend-prod' }}
+      ECR_BACKEND: ${{ vars.ECR_BACKEND_PROD || 'retail-store-backend-prod' }}
+      ECS_CLUSTER: ${{ vars.ECS_CLUSTER_PROD || 'retail-store-prod' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: ecr
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+          echo "registry=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com" >> $GITHUB_OUTPUT
+
+      - name: Tag current prod-latest as prod-previous (for rollback)
+        run: |
+          for REPO in $ECR_FRONTEND $ECR_BACKEND; do
+            MANIFEST=$(aws ecr batch-get-image --repository-name "$REPO" --image-ids imageTag=prod-latest --region "$AWS_REGION" --query 'images[0].imageManifest' --output text 2>/dev/null) || true
+            if [ -n "$MANIFEST" ] && [ "$MANIFEST" != "None" ]; then
+              aws ecr put-image --repository-name "$REPO" --image-tag prod-previous --image-manifest "$MANIFEST" --region "$AWS_REGION" && echo "  $REPO: prod-latest → prod-previous"
+            else
+              echo "  $REPO: no prod-latest (first deploy?), skip"
+            fi
+          done
+
+      - name: Build and push backend (prod)
+        run: |
+          R=${{ steps.ecr.outputs.registry }}
+          docker build -t $R/$ECR_BACKEND:prod-${{ github.sha }} -t $R/$ECR_BACKEND:prod-latest -f backend/Dockerfile backend/
+          docker push $R/$ECR_BACKEND:prod-${{ github.sha }}
+          docker push $R/$ECR_BACKEND:prod-latest
+          echo "BACKEND_IMAGE=$R/$ECR_BACKEND:prod-${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build and push frontend (prod)
+        run: |
+          R=${{ steps.ecr.outputs.registry }}
+          docker build -t $R/$ECR_FRONTEND:prod-${{ github.sha }} -t $R/$ECR_FRONTEND:prod-latest -f frontend/Dockerfile frontend/
+          docker push $R/$ECR_FRONTEND:prod-${{ github.sha }}
+          docker push $R/$ECR_FRONTEND:prod-latest
+
+      - name: Update ECS prod
+        run: |
+          for svc in frontend main cart checkout auth admin; do
+            aws ecs update-service --cluster $ECS_CLUSTER --service $svc --force-new-deployment --region $AWS_REGION --output text --query 'service.serviceName' || true
+          done
+
+      - name: Summary
+        run: |
+          echo "## Prod deploy done" >> $GITHUB_STEP_SUMMARY
+          echo "Backend image: ${{ env.BACKEND_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Seed prod:** Chạy workflow **Seed Prod Database** (manual, một lần khi setup prod)." >> $GITHUB_STEP_SUMMARY
+          echo "Prod chỉ 2 version: **prod-latest** (hiện tại) và **prod-previous** (1 bản trước). Rollback = chạy workflow Rollback Prod trong repo prod (về prod-previous)." >> $GITHUB_STEP_SUMMARY

@@ -1,6 +1,6 @@
 # Hướng dẫn Staging và Production (2 repo)
 
-Repo hiện tại là **Staging repo**. Khi merge vào `main` thì tự động build và deploy lên môi trường **staging** trên AWS. Môi trường **production** dùng repo riêng; code được đẩy sang bằng bước **promote** thủ công, sau đó trong prod repo chạy **Deploy to Prod** và khi cần **Rollback Prod** cũng trong prod repo.
+Repo hiện tại là **Staging repo**. Khi merge vào `main` thì tự động build và deploy lên môi trường **staging** trên AWS. Sau đó **Approve** environment \`prod\` thì deploy **production** chạy (cùng workflow). Repo **prod** chỉ dùng để chạy **Rollback Prod** (về bản trước).
 
 ---
 
@@ -9,9 +9,9 @@ Repo hiện tại là **Staging repo**. Khi merge vào `main` thì tự động 
 | Bước | Repo | Hành động |
 |------|------|-----------|
 | 1 | Staging repo (repo này) | Merge/push vào `main` → **tự động** build + push ECR + deploy ECS **staging** |
-| 2 | Staging repo | Khi staging đã test OK → **manual** chạy workflow **"Promote to Prod Repo"** để đẩy `main` sang prod repo |
-| 3 | Prod repo | **Manual** chạy workflow **"Deploy to Prod"** → build + push ECR prod + deploy ECS **prod** |
-| 4 | Prod repo | Nếu prod lỗi → **manual** chạy **"Rollback Prod"** với image tag cũ |
+| 2 | Staging repo | Khi staging đã test OK → **Approve** environment \`prod\` → deploy prod chạy (trong cùng workflow) |
+| 3 | Staging repo | Sau khi staging xong → **Approve** environment \`prod\` → job deploy prod chạy (build + push ECR prod + deploy ECS **prod**) |
+| 4 | Prod repo | Nếu prod lỗi → **manual** chạy **"Rollback Prod"** (về bản prod-previous, 1 version back) |
 
 ---
 
@@ -41,15 +41,14 @@ Trong repo có sẵn thư mục **terraform-staging/** (region mặc định **a
 - (Tuỳ chọn) `ECR_FRONTEND_STAGING`, `ECR_BACKEND_STAGING`: tên ECR repo nếu khác mặc định.
 - (Tuỳ chọn) `ECS_CLUSTER_STAGING`: tên ECS cluster staging.
 
-**Promote to Prod (nếu dùng workflow Promote):**
+**Cho job Deploy to Prod (chạy trong staging repo sau khi Approve):**
 
-- `PROD_REPO_URL`: URL prod repo, vd `https://github.com/owner/retail-store-prod`.
-- Secret `PROD_REPO_TOKEN`: PAT (Personal Access Token) có quyền push vào prod repo.
+- Variables: `ECR_FRONTEND_PROD`, `ECR_BACKEND_PROD`, `ECS_CLUSTER_PROD` (mặc định trong workflow).
 
 ### 2.4 Prod repo
 
-- Tạo repo mới (vd `retail-store-prod`). Code sẽ được push từ staging repo qua workflow "Promote to Prod" hoặc `git push prod-repo main:main` thủ công.
-- Cấu hình **Secrets** và **Variables** tương tự (ECR prod, ECS cluster prod). Copy workflow từ `.github/workflows/examples/` (đổi tên bỏ `.example`).
+- Tạo repo mới (vd `Retail-Store-prod`, https://github.com/BuiHongKong/Retail-Store-prod). Code sẽ được push từ staging repo qua workflow "Promote to Prod" hoặc `git push prod-repo main:main` thủ công.
+- Cấu hình **Secrets** và **Variables** (AWS, ECS cluster prod). Copy workflow từ `.github/workflows/for-prod-repo/rollback-prod.yml.example` vào prod thành `rollback-prod.yml`.
 
 ---
 
@@ -93,11 +92,9 @@ Production dùng repo riêng; code đẩy từ repo này sang rồi deploy trong
 
 | Bước | Hành động | Ghi chú |
 |------|-----------|--------|
-| 1 | **Cấu hình Promote** (repo này): GitHub Variables `PROD_REPO_URL`, Secret `PROD_REPO_TOKEN` (PAT có quyền push prod repo) | Chỉ cần nếu dùng workflow Promote. |
-| 2 | **Chạy workflow "Promote to Prod Repo"** (manual) trong repo này | Đẩy nhánh `main` sang prod repo. |
-| 3 | **Trong prod repo**: Cấu hình Secrets/Variables (AWS, ECR prod, ECS cluster prod), copy workflow deploy-prod từ `.github/workflows/examples/` | |
-| 4 | **Chạy workflow "Deploy to Prod"** (manual) trong prod repo | Build → ECR prod → ECS prod. |
-| 5 | **(Khi cần) Rollback**: Trong prod repo chạy "Rollback Prod" với image tag cũ | Ghi lại image tag sau mỗi deploy prod. |
+| 1 | **Trong prod repo**: Cấu hình Secrets (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY), Variables (AWS_REGION, ECS_CLUSTER_PROD), copy `.github/workflows/for-prod-repo/rollback-prod.yml.example` thành `rollback-prod.yml`. | |
+| 2 | **Staging repo**: Push/merge \`main\` → deploy staging chạy → **Review deployments** → Approve environment \`prod\` → job deploy prod chạy. | |
+| 3 | **(Khi cần) Rollback**: Trong prod repo chạy workflow "Rollback Prod". | Prod chỉ 2 version: latest và previous; rollback = về prod-previous. |
 
 ---
 
@@ -105,7 +102,7 @@ Production dùng repo riêng; code đẩy từ repo này sang rồi deploy trong
 
 - **CI** (`.github/workflows/ci.yml`): Chạy khi push/PR lên `main` hoặc `develop` — lint frontend.
 - **Deploy to Staging** (`.github/workflows/deploy-staging.yml`): Chạy khi **push/merge vào `main`** — build Docker (frontend + backend), push ECR tag `staging-<sha>` và `staging-latest`, gọi `aws ecs update-service` cho 6 service staging.
-- **Promote to Prod Repo** (`.github/workflows/promote-to-prod.yml`): **Manual** — đẩy nhánh `main` sang prod repo. Cần cấu hình `PROD_REPO_URL` và `PROD_REPO_TOKEN`.
+- **Deploy to Prod** (job trong `deploy-staging.yml`): Sau khi staging xong, **Approve** environment \`prod\` → build + push ECR prod + update ECS prod.
 
 ---
 
@@ -122,10 +119,7 @@ Workflow Deploy to Staging có gợi ý trong job summary; URL thật lấy từ
 
 ## 6. Prod repo — Deploy và Rollback
 
-- Copy `.github/workflows/examples/deploy-prod.yml.example` vào prod repo thành `.github/workflows/deploy-prod.yml`. Cấu hình variables/secrets (ECR prod, ECS cluster prod, AWS credentials). Chạy **manual** khi đã promote code.
-- Copy `.github/workflows/examples/rollback-prod.yml.example` thành `.github/workflows/rollback-prod.yml`. Rollback = deploy lại bản cũ: cần cập nhật **task definition** trên ECS để trỏ image tag cũ (vd `prod-abc123`), rồi `update-service`. Có thể dùng AWS Console (ECS → Task definitions → Create revision với image tag mới) hoặc script/CLI.
-
-Sau mỗi lần deploy prod nên ghi lại **image tag** (vd trong GitHub Release hoặc file) để khi rollback biết tag cần dùng.
+- Copy `.github/workflows/for-prod-repo/rollback-prod.yml.example` vào prod repo thành `.github/workflows/rollback-prod.yml`. Rollback = cập nhật ECS để dùng image tag **prod-previous** (1 bản trước). Không cần nhập tag — prod chỉ có 2 version: latest và previous.
 
 ---
 
@@ -155,6 +149,5 @@ Mở `http://localhost:8080` (frontend); API cần trỏ tới backend (vd cùng
 | `frontend/nginx.conf` | Cấu hình nginx (SPA try_files). |
 | `.github/workflows/ci.yml` | Lint frontend. |
 | `.github/workflows/deploy-staging.yml` | Push `main` → build → ECR → ECS staging. |
-| `.github/workflows/promote-to-prod.yml` | Manual: push `main` sang prod repo. |
-| `.github/workflows/examples/deploy-prod.yml.example` | Mẫu workflow deploy prod (copy vào prod repo). |
-| `.github/workflows/examples/rollback-prod.yml.example` | Mẫu workflow rollback prod (copy vào prod repo). |
+| `.github/workflows/deploy-staging.yml` | Push `main` → deploy staging; Approve \`prod\` → deploy prod. |
+| `.github/workflows/for-prod-repo/rollback-prod.yml.example` | Mẫu workflow rollback (copy vào prod repo thành `rollback-prod.yml`). |
