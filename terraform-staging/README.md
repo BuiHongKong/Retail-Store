@@ -46,3 +46,4 @@ Mặc định **ap-southeast-1** (Singapore). Đổi trong `variables.tf` hoặc
 ## State
 
 Mặc định state lưu local. Để dùng S3 (team): bỏ comment block `backend "s3"` trong `provider.tf`, tạo bucket và DynamoDB table, rồi `terraform init -reconfigure`.
+<!-- push to staging -->
