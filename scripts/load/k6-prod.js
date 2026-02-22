@@ -1,7 +1,15 @@
 /**
- * k6 load script — simulates user traffic for Grafana (prod) metrics.
- * Run: k6 run scripts/load/k6-prod.js
- * With base URL: k6 run -e BASE_URL=https://your-prod-url scripts/load/k6-prod.js
+ * -----------------------------------------------------------------------------
+ * GIẢ LẬP USER (LOAD TEST) — Production — Full flow
+ * -----------------------------------------------------------------------------
+ * Script k6 mô phỏng user: đăng ký → đăng nhập (token) → auth/me → categories
+ * → products → chi tiết sản phẩm → giỏ hàng → thêm vào giỏ → checkout preview
+ * → POST checkout (đặt hàng) → GET orders → likes (GET/POST/DELETE).
+ * Tạo traffic để Prometheus thu thập metrics; xem trên Grafana.
+ *
+ * Chạy local:  k6 run -e BASE_URL=http://<prod-alb> scripts/load/k6-prod.js
+ * GitHub:      workflow Load test (prod) dùng secret PROD_URL. Xem MONITORING.md.
+ * -----------------------------------------------------------------------------
  */
 import http from "k6/http";
 import { check, sleep } from "k6";
@@ -9,6 +17,7 @@ import { check, sleep } from "k6";
 const BASE_URL = __ENV.BASE_URL || "http://localhost:5173";
 
 const PRODUCT_SLUGS = ["amongus", "baby", "frog", "breakfast", "cat", "dog"];
+const REGISTER_PASSWORD = "password123";
 
 function randomItem(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -20,6 +29,11 @@ function uuid() {
     const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
+}
+
+/** Unique email per VU/iteration to avoid "Email already registered" */
+function uniqueEmail() {
+  return `loadtest-vu${__VU}-iter${__ITER}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@example.com`;
 }
 
 export const options = {
@@ -38,14 +52,37 @@ export const options = {
 export default function () {
   const cartSession = uuid();
   const likesSession = uuid();
+
+  // --- 1. Register (app bắt buộc đăng ký mới dùng được)
+  const email = uniqueEmail();
+  let res = http.post(
+    `${BASE_URL}/api/auth/register`,
+    JSON.stringify({ email, password: REGISTER_PASSWORD, name: "Load Test User" }),
+    { headers: { "Content-Type": "application/json" } }
+  );
+  const registerOk = check(res, {
+    "register OK": (r) => r.status === 201 && r.json("token"),
+  });
+  if (!registerOk) {
+    return;
+  }
+  const token = res.json("token");
+  sleep(0.3);
+
   const headers = {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
     "x-cart-session": cartSession,
     "X-Likes-Session": likesSession,
   };
 
-  // Flow 1: Browse + cart + checkout preview (guest)
-  let res = http.get(`${BASE_URL}/api/categories`);
+  // --- 2. Auth/me (verify logged in)
+  res = http.get(`${BASE_URL}/api/auth/me`, { headers });
+  check(res, { "auth/me OK": (r) => r.status === 200 });
+  sleep(0.2);
+
+  // --- 3. Browse: categories → products → product detail
+  res = http.get(`${BASE_URL}/api/categories`);
   check(res, { "categories OK": (r) => r.status === 200 });
   sleep(0.5);
 
@@ -58,6 +95,7 @@ export default function () {
   check(res, (r) => r.status === 200 && r.json("slug"));
   sleep(0.2);
 
+  // --- 4. Cart: get cart → add item
   res = http.get(`${BASE_URL}/api/cart`, { headers });
   check(res, (r) => r.status === 200);
   sleep(0.2);
@@ -70,11 +108,30 @@ export default function () {
   check(res, (r) => r.status === 200 || r.status === 201);
   sleep(0.3);
 
+  // --- 5. Checkout preview
   res = http.get(`${BASE_URL}/api/checkout/preview`, { headers });
   check(res, (r) => r.status === 200);
+  sleep(0.3);
+
+  // --- 6. POST checkout (đặt hàng giả lập — COD)
+  res = http.post(
+    `${BASE_URL}/api/checkout`,
+    JSON.stringify({
+      paymentMethod: "cod",
+      shippingAddress: "123 Load Test Street, District 1",
+      phone: "0900000000",
+    }),
+    { headers }
+  );
+  check(res, (r) => r.status === 201 && r.json("success"));
   sleep(0.5);
 
-  // Flow 2: Likes
+  // --- 7. Orders (lịch sử đơn hàng)
+  res = http.get(`${BASE_URL}/api/orders`, { headers });
+  check(res, (r) => r.status === 200);
+  sleep(0.3);
+
+  // --- 8. Likes
   res = http.get(`${BASE_URL}/api/likes`, { headers });
   check(res, (r) => r.status === 200);
   sleep(0.2);

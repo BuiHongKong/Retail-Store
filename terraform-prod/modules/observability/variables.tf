@@ -1,3 +1,6 @@
+# -----------------------------------------------------------------------------
+# MONITORING — Biến cho module observability (Grafana, Prometheus, Loki)
+# -----------------------------------------------------------------------------
 variable "project_name" {
   type    = string
   default = "retail-store"

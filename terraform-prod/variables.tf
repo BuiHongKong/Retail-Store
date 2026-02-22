@@ -74,6 +74,7 @@ variable "admin_jwt_secret" {
   default     = "change-me-in-production"
 }
 
+# MONITORING: mật khẩu đăng nhập Grafana (UI tại /grafana)
 variable "grafana_admin_password" {
   description = "Grafana admin password (observability)"
   type        = string

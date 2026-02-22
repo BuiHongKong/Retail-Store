@@ -1,3 +1,6 @@
+# -----------------------------------------------------------------------------
+# MONITORING — Output của module observability (dùng bởi observability.tf cho SG rule)
+# -----------------------------------------------------------------------------
 output "observability_security_group_id" {
   value = aws_security_group.observability.id
 }

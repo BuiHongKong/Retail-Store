@@ -1,6 +1,12 @@
 /**
- * Prometheus metrics for all backend services.
- * Use: app.use(metrics.middleware); app.get("/metrics", metrics.handler);
+ * -----------------------------------------------------------------------------
+ * MONITORING — Prometheus metrics (dùng bởi tất cả backend server)
+ * -----------------------------------------------------------------------------
+ * Middleware đếm request (http_requests_total) và đo latency (http_request_duration_seconds).
+ * Endpoint GET /metrics trả Prometheus text format để Prometheus (prod) scrape.
+ * Thêm vào mỗi server: app.use(metrics.middleware); app.get("/metrics", metrics.handler);
+ * Không ghi /health và /metrics vào metrics để tránh nhiễu.
+ * -----------------------------------------------------------------------------
  */
 const { Registry, Counter, Histogram, collectDefaultMetrics } = require("prom-client");
 

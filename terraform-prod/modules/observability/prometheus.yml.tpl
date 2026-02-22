@@ -1,3 +1,9 @@
+# -----------------------------------------------------------------------------
+# MONITORING — Cấu hình scrape của Prometheus (template, inject vào container)
+# -----------------------------------------------------------------------------
+# DNS service discovery: main.retail-store.local:3000, cart.retail-store.local:3001, ...
+# Mỗi job scrape GET /metrics của từng backend. backend_services và namespace_name từ Terraform.
+# -----------------------------------------------------------------------------
 global:
   scrape_interval: 15s
   evaluation_interval: 15s

@@ -1,3 +1,12 @@
+# -----------------------------------------------------------------------------
+# MONITORING — Module observability (Grafana, Prometheus, Loki)
+# -----------------------------------------------------------------------------
+# Tạo ECS cluster riêng + 3 service: Prometheus (scrape app /metrics), Grafana (UI),
+# Loki (log store). Security group cho phép ALB → Grafana:3000; Prometheus self:9090.
+# Prometheus config từ prometheus.yml.tpl (DNS service discovery). Grafana datasource
+# = http://prometheus.retail-store.local:9090. ALB listener rule /grafana → Grafana.
+# Gọi từ terraform-prod/observability.tf.
+# -----------------------------------------------------------------------------
 locals {
   name_prefix = "${var.project_name}-${var.environment}-obs"
 }

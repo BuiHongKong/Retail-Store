@@ -169,6 +169,7 @@ resource "aws_ecs_service" "backend" {
     container_name   = each.value.name
     container_port    = each.value.port
   }
+  # MONITORING: đăng ký vào service discovery (retail-store.local) để Prometheus scrape /metrics
   service_registries {
     registry_arn = aws_service_discovery_service.backend[each.value.name].arn
   }

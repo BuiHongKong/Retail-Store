@@ -1,4 +1,13 @@
-# Observability stack: Prometheus, Grafana, Loki (self-hosted on ECS) — production only
+# -----------------------------------------------------------------------------
+# MONITORING — Observability stack (production only)
+# -----------------------------------------------------------------------------
+# Deploy Grafana, Prometheus, Loki trên ECS Fargate trong VPC prod.
+# - Grafana: UI tại ALB path /grafana, datasource Prometheus đã cấu hình.
+# - Prometheus: scrape GET /metrics của từng backend (main, cart, checkout, auth, admin) qua service discovery.
+# - Loki: lưu log; có thể thêm làm datasource trong Grafana.
+# Cần: service_discovery.tf (namespace + backend + prometheus), ECS backend có service_registries.
+# Chi tiết: MONITORING.md
+# -----------------------------------------------------------------------------
 module "observability" {
   source = "./modules/observability"
 

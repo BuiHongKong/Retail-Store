@@ -1,4 +1,11 @@
-# Service discovery for Prometheus scrape (DNS: main.retail-store.local, etc.)
+# -----------------------------------------------------------------------------
+# MONITORING — Service discovery cho Prometheus (production only)
+# -----------------------------------------------------------------------------
+# Private DNS namespace "retail-store.local" trong VPC prod. Mỗi ECS backend service
+# đăng ký tên (main, cart, checkout, auth, admin) → Prometheus resolve main.retail-store.local:3000
+# để scrape GET /metrics. Prometheus cũng đăng ký → Grafana resolve prometheus.retail-store.local:9090.
+# ECS task definition backend cần block service_registries (xem ecs.tf).
+# -----------------------------------------------------------------------------
 resource "aws_service_discovery_private_dns_namespace" "main" {
   name        = "retail-store.local"
   vpc         = aws_vpc.main.id

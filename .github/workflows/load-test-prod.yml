@@ -1,5 +1,12 @@
-# Run k6 load test against production to generate metrics for Grafana (prod).
-# Set secret PROD_URL (e.g. http://your-prod-alb-dns) and optionally enable schedule.
+# -----------------------------------------------------------------------------
+# GIẢ LẬP USER (LOAD TEST) — Production only
+# -----------------------------------------------------------------------------
+# Chạy k6 (scripts/load/k6-prod.js) gửi traffic vào prod để tạo metrics trong Grafana.
+# - Kích hoạt: repo Settings → Secrets → thêm PROD_URL = http://<prod-alb-dns>
+# - Chạy: Actions → Load test (prod) → Run workflow (hoặc đợi cron 02:00 UTC).
+# - Kết quả: request rate, latency, 5xx hiển thị trên Grafana prod tại /grafana.
+# Chi tiết: MONITORING.md
+# -----------------------------------------------------------------------------
 name: Load test (prod)
 on:
   schedule:
