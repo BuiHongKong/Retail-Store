@@ -169,6 +169,9 @@ resource "aws_ecs_service" "backend" {
     container_name   = each.value.name
     container_port    = each.value.port
   }
+  service_registries {
+    registry_arn = aws_service_discovery_service.backend[each.value.name].arn
+  }
   tags = {
     Name = "${var.project_name}-${var.environment}-${each.value.name}"
   }

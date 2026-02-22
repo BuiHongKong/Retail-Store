@@ -73,3 +73,10 @@ variable "admin_jwt_secret" {
   sensitive   = true
   default     = "change-me-in-production"
 }
+
+variable "grafana_admin_password" {
+  description = "Grafana admin password (observability)"
+  type        = string
+  sensitive   = true
+  default     = "admin"
+}

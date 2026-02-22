@@ -425,6 +425,9 @@ Mở `http://localhost:8080` (frontend); API cần trỏ tới backend (path `/a
 | `.github/workflows/promote-to-prod.yml` | Manual: push `main` sang prod repo. |
 | `.github/workflows/examples/deploy-prod.yml.example` | Mẫu workflow deploy prod (copy vào prod repo). |
 | `.github/workflows/examples/rollback-prod.yml.example` | Mẫu workflow rollback prod (copy vào prod repo). |
+| `.github/workflows/load-test-prod.yml` | Optional: scheduled/manual k6 load test; cần secret `PROD_URL`. |
+
+**Monitoring & giả lập user (chỉ prod):** xem [MONITORING.md](MONITORING.md).
 
 ---
 

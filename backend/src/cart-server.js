@@ -1,14 +1,17 @@
 require("dotenv").config();
 const express = require("express");
 const cartRouter = require("../services/cart/router");
+const metrics = require("../services/metrics");
 
 const app = express();
 const PORT = process.env.CART_PORT || 3001;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 app.use(express.json());
+app.use(metrics.middleware);
 
 app.get("/health", (req, res) => res.sendStatus(200));
+app.get("/metrics", metrics.handler);
 
 // CORS — frontend (Vite thường 5173) gọi từ origin khác
 app.use((req, res, next) => {
