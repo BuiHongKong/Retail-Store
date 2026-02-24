@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
+const { authLoginsTotal } = require("../metrics");
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -99,6 +100,7 @@ router.post("/auth/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     console.log("[AUTH] login result=success id=" + user.id);
+    authLoginsTotal.inc();
     const token = createToken({ id: user.id, email: user.email });
     res.json({ token, user: toUserResponse(user) });
   } catch (err) {

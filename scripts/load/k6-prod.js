@@ -66,6 +66,15 @@ export default function () {
   if (!registerOk) {
     return;
   }
+  sleep(0.2);
+
+  // --- Login (tăng auth_logins_total)
+  res = http.post(
+    `${BASE_URL}/api/auth/login`,
+    JSON.stringify({ email, password: REGISTER_PASSWORD }),
+    { headers: { "Content-Type": "application/json" } }
+  );
+  check(res, { "login OK": (r) => r.status === 200 && r.json("token") });
   const token = res.json("token");
   sleep(0.3);
 
@@ -113,14 +122,17 @@ export default function () {
   check(res, (r) => r.status === 200);
   sleep(0.3);
 
-  // --- 6. POST checkout (đặt hàng giả lập — COD)
+  // --- 6. POST checkout (đặt hàng — COD hoặc card để có metrics cả hai)
+  const useCard = Math.random() < 0.5;
+  const checkoutBody = {
+    paymentMethod: useCard ? "card" : "cod",
+    shippingAddress: "123 Load Test Street, District 1",
+    phone: "0900000000",
+  };
+  if (useCard) checkoutBody.cardHolder = "Load Test User";
   res = http.post(
     `${BASE_URL}/api/checkout`,
-    JSON.stringify({
-      paymentMethod: "cod",
-      shippingAddress: "123 Load Test Street, District 1",
-      phone: "0900000000",
-    }),
+    JSON.stringify(checkoutBody),
     { headers }
   );
   check(res, (r) => r.status === 201 && r.json("success"));

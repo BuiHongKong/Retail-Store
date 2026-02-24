@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
+const { productSalesTotal, checkoutPaymentsTotal } = require("../metrics");
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -20,7 +21,7 @@ function getUserIdFromRequest(req) {
 }
 
 const cartInclude = {
-  items: { include: { product: true } },
+  items: { include: { product: { include: { category: true } } } },
 };
 
 /** GET /checkout/preview — xem nhanh giỏ trước khi thanh toán (cùng DB, đọc cart theo session) */
@@ -135,6 +136,13 @@ router.post("/checkout", async (req, res) => {
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
       return newOrder;
     });
+
+    for (const item of cart.items) {
+      const p = item.product;
+      const categorySlug = p.category ? p.category.slug : "unknown";
+      productSalesTotal.inc({ product_slug: p.slug, category_slug: categorySlug }, item.quantity);
+    }
+    checkoutPaymentsTotal.inc({ payment_method: paymentMethod });
 
     res.status(201).json({
       success: true,

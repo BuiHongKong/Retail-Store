@@ -30,6 +30,26 @@ const httpRequestDurationSeconds = new Histogram({
   registers: [register],
 });
 
+const productSalesTotal = new Counter({
+  name: "product_sales_total",
+  help: "Total quantity sold per product by category",
+  labelNames: ["product_slug", "category_slug"],
+  registers: [register],
+});
+
+const authLoginsTotal = new Counter({
+  name: "auth_logins_total",
+  help: "Total successful logins",
+  registers: [register],
+});
+
+const checkoutPaymentsTotal = new Counter({
+  name: "checkout_payments_total",
+  help: "Total checkouts by payment method (cod | card)",
+  labelNames: ["payment_method"],
+  registers: [register],
+});
+
 /**
  * Normalize path to avoid high cardinality (e.g. /api/products/abc -> /api/products/:slug)
  */
@@ -73,4 +93,7 @@ module.exports = {
   handler,
   httpRequestsTotal,
   httpRequestDurationSeconds,
+  productSalesTotal,
+  authLoginsTotal,
+  checkoutPaymentsTotal,
 };
