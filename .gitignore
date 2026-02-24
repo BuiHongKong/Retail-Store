@@ -1,1 +1,57 @@
+# Root / IDE
 .cursor
+
+# Dependencies
+node_modules
+
+# Build / output
+dist
+dist-ssr
+uploads
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Sensitive / env
+.env
+.env.*
+.env.local
+.env.*.local
+!.env.example
+
+# Keys, secrets
+*.pem
+*.key
+secrets/
+.secrets
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!terraform.tfvars.example
+.terraform.lock.hcl
+crash.*
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.local
