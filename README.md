@@ -357,7 +357,7 @@ Thư mục **terraform-staging/** (region mặc định **ap-southeast-1**): VPC
 - **Quick start:** `cp terraform.tfvars.example terraform.tfvars` → sửa `db_password` (nếu `create_rds = true`) hoặc `create_rds = false` và `database_url` → `terraform init` → `terraform plan` → `terraform apply`.
 - **Biến quan trọng:** `aws_region`, `enable_nat_gateway`, `create_rds`, `db_password`, `database_url`.
 - **Outputs:** `staging_url`, `ecr_frontend_url`, `ecr_backend_url`, `ecs_cluster_name`.
-- **Seed DB (một lần):** Trong `terraform-staging/` chạy `bash run-seed-once.sh` (Git Bash, cần `jq`). User demo: `demo@example.com` / `demo123`, Admin: `admin@example.com` / `admin123`.
+- **Seed DB staging:** Tự chạy trong pipeline khi push `main` (step "Seed database"). User demo: `demo@example.com` / `demo123`, Admin: `admin@example.com` / `admin123`. Prod: chạy workflow **Seed Prod Database** (Actions, một lần).
 - **State:** Mặc định local; muốn S3 thì bỏ comment block `backend "s3"` trong `provider.tf`.
 
 ### Điều kiện — Terraform Production
