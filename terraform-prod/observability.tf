@@ -27,6 +27,7 @@ module "observability" {
   service_discovery_namespace_id   = aws_service_discovery_private_dns_namespace.main.id
   service_discovery_namespace_name = aws_service_discovery_private_dns_namespace.main.name
   prometheus_service_discovery_arn = aws_service_discovery_service.prometheus.arn
+  loki_service_discovery_arn       = aws_service_discovery_service.loki.arn
   backend_services                = [for s in local.ecs_backend_services : { name = s.name, port = s.port }]
 
   grafana_admin_password = var.grafana_admin_password

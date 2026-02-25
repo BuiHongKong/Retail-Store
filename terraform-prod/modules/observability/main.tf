@@ -29,6 +29,13 @@ resource "aws_security_group" "observability" {
     self      = true
     description = "Prometheus UI"
   }
+  ingress {
+    from_port = 3100
+    to_port   = 3100
+    protocol  = "tcp"
+    self      = true
+    description = "Loki from Grafana / log shippers"
+  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -99,9 +106,10 @@ resource "aws_ecs_task_definition" "prometheus" {
   }])
 }
 
-# Grafana task definition (Prometheus URL via service discovery)
+# Grafana task definition (Prometheus + Loki via service discovery)
 locals {
   prometheus_url = "http://prometheus.${var.service_discovery_namespace_name}:9090"
+  loki_url       = "http://loki.${var.service_discovery_namespace_name}:3100"
 }
 
 resource "aws_ecs_task_definition" "grafana" {
@@ -123,7 +131,10 @@ resource "aws_ecs_task_definition" "grafana" {
       { name = "GF_USERS_ALLOW_SIGN_UP", value = "false" },
       { name = "GF_DATASOURCES_DEFAULT_NAME", value = "Prometheus" },
       { name = "GF_DATASOURCES_DEFAULT_TYPE", value = "prometheus" },
-      { name = "GF_DATASOURCES_DEFAULT_URL", value = local.prometheus_url }
+      { name = "GF_DATASOURCES_DEFAULT_URL", value = local.prometheus_url },
+      { name = "GF_DATASOURCES_1_NAME", value = "Loki" },
+      { name = "GF_DATASOURCES_1_TYPE", value = "loki" },
+      { name = "GF_DATASOURCES_1_URL", value = local.loki_url }
     ]
     logConfiguration = {
       logDriver = "awslogs"
@@ -192,7 +203,7 @@ resource "aws_ecs_service" "prometheus" {
   }
 }
 
-# Loki service (no ALB)
+# Loki service (no ALB); register in service discovery for Grafana
 resource "aws_ecs_service" "loki" {
   name            = "loki"
   cluster         = aws_ecs_cluster.observability.id
@@ -203,6 +214,12 @@ resource "aws_ecs_service" "loki" {
     subnets          = var.subnet_ids
     security_groups  = [aws_security_group.observability.id]
     assign_public_ip = true
+  }
+  dynamic "service_registries" {
+    for_each = var.loki_service_discovery_arn != "" ? [1] : []
+    content {
+      registry_arn = var.loki_service_discovery_arn
+    }
   }
   tags = {
     Name = "${local.name_prefix}-loki"

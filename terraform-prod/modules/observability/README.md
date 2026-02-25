@@ -2,7 +2,7 @@
 
 - **Grafana:** ALB path `/grafana`, admin password from variable `grafana_admin_password`. Default Prometheus datasource is configured via env (prometheus.retail-store.local:9090).
 - **Prometheus:** Scrapes app services via service discovery (main, cart, checkout, auth, admin) on path `/metrics`. No UI exposed on ALB.
-- **Loki:** Runs in the same cluster; add Loki as datasource in Grafana (URL `http://loki.retail-store.local:3100`) for logs once you ship logs to Loki.
+- **Loki:** Runs in the same cluster, registered in service discovery as `loki.retail-store.local:3100`. Grafana has Loki pre-configured as datasource (env `GF_DATASOURCES_1_*`). When ECS logs are shipped to Loki (e.g. Lambda or Fluent Bit), they will show in Grafana Explore.
 
 ## Dashboard
 

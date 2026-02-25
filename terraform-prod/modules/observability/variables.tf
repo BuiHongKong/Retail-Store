@@ -90,3 +90,9 @@ variable "prometheus_service_discovery_arn" {
   type        = string
   default     = ""
 }
+
+variable "loki_service_discovery_arn" {
+  description = "Service discovery registry ARN for Loki (so Grafana can resolve loki.namespace:3100)"
+  type        = string
+  default     = ""
+}
