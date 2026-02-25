@@ -96,3 +96,9 @@ variable "loki_service_discovery_arn" {
   type        = string
   default     = ""
 }
+
+variable "grafana_image" {
+  description = "Grafana container image (use ECR custom image with provisioned dashboards, or grafana/grafana:latest)"
+  type        = string
+  default     = "grafana/grafana:latest"
+}

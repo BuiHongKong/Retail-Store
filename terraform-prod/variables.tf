@@ -53,6 +53,12 @@ variable "ecr_backend_name" {
   default     = "retail-store-backend-prod"
 }
 
+variable "ecr_grafana_name" {
+  description = "ECR repository name for Grafana (custom image with provisioned dashboards)"
+  type        = string
+  default     = "retail-store-grafana-prod"
+}
+
 variable "database_url" {
   description = "Chỉ dùng khi create_rds = false (DB ngoài). Khi dùng RDS thì để trống."
   type        = string

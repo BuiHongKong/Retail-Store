@@ -122,7 +122,7 @@ resource "aws_ecs_task_definition" "grafana" {
   task_role_arn            = var.ecs_task_role_arn
   container_definitions = jsonencode([{
     name  = "grafana"
-    image = "grafana/grafana:10.2.0"
+    image = var.grafana_image
     portMappings = [{ containerPort = 3000, protocol = "tcp" }]
     environment = [
       { name = "GF_SECURITY_ADMIN_PASSWORD", value = var.grafana_admin_password },
