@@ -34,7 +34,14 @@ resource "aws_security_group" "observability" {
     to_port   = 3100
     protocol  = "tcp"
     self      = true
-    description = "Loki from Grafana / log shippers"
+    description = "Loki from Grafana"
+  }
+  ingress {
+    from_port       = 3100
+    to_port         = 3100
+    protocol        = "tcp"
+    security_groups = [var.ecs_security_group_id]
+    description     = "Loki push from app (Promtail)"
   }
   egress {
     from_port   = 0

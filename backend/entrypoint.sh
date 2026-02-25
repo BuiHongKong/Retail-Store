@@ -12,10 +12,18 @@ fi
 npx prisma migrate deploy
 
 case "$SERVICE" in
-  main)    exec node src/index.js ;;
-  cart)    exec node src/cart-server.js ;;
-  checkout) exec node src/checkout-server.js ;;
-  auth)    exec node src/auth-server.js ;;
-  admin)   exec node src/admin-server.js ;;
-  *)       exec node src/index.js ;;
+  main)    NODE_SCRIPT="node src/index.js" ;;
+  cart)    NODE_SCRIPT="node src/cart-server.js" ;;
+  checkout) NODE_SCRIPT="node src/checkout-server.js" ;;
+  auth)    NODE_SCRIPT="node src/auth-server.js" ;;
+  admin)   NODE_SCRIPT="node src/admin-server.js" ;;
+  *)       NODE_SCRIPT="node src/index.js" ;;
 esac
+
+# Optional: duplicate stdout/stderr to file for Promtail (e.g. WRITE_LOG_FILE=/var/log/app/app.log)
+if [ -n "$WRITE_LOG_FILE" ]; then
+  mkdir -p "$(dirname "$WRITE_LOG_FILE")"
+  $NODE_SCRIPT 2>&1 | tee -a "$WRITE_LOG_FILE"
+  exit ${PIPESTATUS[0]:-0}
+fi
+exec $NODE_SCRIPT

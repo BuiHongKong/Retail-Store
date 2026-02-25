@@ -100,6 +100,7 @@ router.post("/auth/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
     console.log("[AUTH] login result=success id=" + user.id);
+    console.log(JSON.stringify({ event: "user_login", email: normalizedEmail }));
     authLoginsTotal.inc();
     const token = createToken({ id: user.id, email: user.email });
     res.json({ token, user: toUserResponse(user) });

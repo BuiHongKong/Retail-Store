@@ -98,6 +98,11 @@ locals {
   ]
 }
 
+locals {
+  loki_url = "http://loki.retail-store.local:3100"
+  promtail_config = { for s in local.ecs_backend_services : s.name => base64encode(templatefile("${path.module}/promtail-config.yml.tpl", { loki_url = local.loki_url, service_name = s.name })) }
+}
+
 resource "aws_ecs_task_definition" "backend" {
   for_each                 = { for s in local.ecs_backend_services : s.name => s }
   family                   = "${var.project_name}-${var.environment}-${each.value.name}"
@@ -107,27 +112,53 @@ resource "aws_ecs_task_definition" "backend" {
   memory                   = "512"
   execution_role_arn       = aws_iam_role.ecs_execution.arn
   task_role_arn            = aws_iam_role.ecs_task.arn
-  container_definitions = jsonencode([{
-    name  = each.value.name
-    image = "${local.ecr_backend_url}:${local.image_tag}"
-    portMappings = [{ containerPort = each.value.port, protocol = "tcp" }]
-    environment = concat(
-      each.value.env,
-      local.database_url != "" ? [{ name = "DATABASE_URL", value = local.database_url }] : [],
-      [
-        { name = "JWT_SECRET", value = var.jwt_secret },
-        { name = "ADMIN_JWT_SECRET", value = var.admin_jwt_secret }
+  volume {
+    name = "applogs"
+  }
+  container_definitions = jsonencode([
+    {
+      name  = each.value.name
+      image = "${local.ecr_backend_url}:${local.image_tag}"
+      portMappings = [{ containerPort = each.value.port, protocol = "tcp" }]
+      environment = concat(
+        each.value.env,
+        local.database_url != "" ? [{ name = "DATABASE_URL", value = local.database_url }] : [],
+        [
+          { name = "JWT_SECRET", value = var.jwt_secret },
+          { name = "ADMIN_JWT_SECRET", value = var.admin_jwt_secret },
+          { name = "WRITE_LOG_FILE", value = "/var/log/app/app.log" }
+        ]
+      )
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-${each.value.name}"
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = each.value.name
+        }
+      }
+      mountPoints = [{ sourceVolume = "applogs", containerPath = "/var/log/app", readOnly = false }]
+    },
+    {
+      name      = "promtail"
+      image     = "grafana/promtail:2.9.0"
+      essential = false
+      environment = [
+        { name = "PROMTAIL_CONFIG_B64", value = local.promtail_config[each.value.name] }
       ]
-    )
-    logConfiguration = {
-      logDriver = "awslogs"
-      options = {
-        "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-${each.value.name}"
-        "awslogs-region"        = var.aws_region
-        "awslogs-stream-prefix" = each.value.name
+      entryPoint = ["sh", "-c"]
+      command    = ["echo \"$PROMTAIL_CONFIG_B64\" | base64 -d > /tmp/promtail-config.yml && exec /usr/bin/promtail -config.file=/tmp/promtail-config.yml"]
+      mountPoints = [{ sourceVolume = "applogs", containerPath = "/var/log/app", readOnly = true }]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-${each.value.name}"
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "promtail"
+        }
       }
     }
-  }])
+  ])
 }
 
 # ECS Services
