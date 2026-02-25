@@ -91,8 +91,8 @@ resource "aws_ecs_task_definition" "prometheus" {
     environment = [
       { name = "PROMETHEUS_CONFIG_B64", value = local.prometheus_config_b64 }
     ]
+    entryPoint = ["sh", "-c"]
     command = [
-      "sh", "-c",
       "echo \"$PROMETHEUS_CONFIG_B64\" | base64 -d > /etc/prometheus/prometheus.yml && exec /bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.enable-lifecycle"
     ]
     logConfiguration = {
