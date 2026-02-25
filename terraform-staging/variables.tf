@@ -38,7 +38,7 @@ variable "db_password" {
   description = "RDS master password. Bắt buộc khi create_rds = true. Set qua TF_VAR_db_password hoặc terraform.tfvars."
   type        = string
   sensitive   = true
-  default     = "kongbui19994"
+  default     = ""
 }
 
 variable "ecr_frontend_name" {
@@ -64,12 +64,12 @@ variable "jwt_secret" {
   description = "JWT secret for auth service"
   type        = string
   sensitive   = true
-  default     = "XZIuoHAf3M2KQRXLq6iH2Xlmvtcne592mWMwvwhKB4o="
+  default     = ""
 }
 
 variable "admin_jwt_secret" {
   description = "Admin JWT secret"
   type        = string
   sensitive   = true
-  default     = "Ic75j5FXcaqdWNmG+FaWbFymzOqvZuqPDDKklIZhOi8="
+  default     = ""
 }

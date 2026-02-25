@@ -1,0 +1,45 @@
+# -----------------------------------------------------------------------------
+# GIẢ LẬP USER (LOAD TEST) — Production only
+# -----------------------------------------------------------------------------
+# Chạy k6 (scripts/load/k6-prod.js) gửi traffic vào prod để tạo metrics trong Grafana.
+# - Kích hoạt: repo Settings → Secrets → thêm PROD_URL = http://<prod-alb-dns>
+# - Chạy: Actions → Load test (prod) → Run workflow (hoặc đợi cron 02:00 UTC).
+# - Kết quả: request rate, latency, 5xx hiển thị trên Grafana prod tại /grafana.
+# Chi tiết: MONITORING.md
+# -----------------------------------------------------------------------------
+name: Load test (prod)
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+jobs:
+  k6-load-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check PROD_URL
+        run: |
+          if [ -z "${{ secrets.PROD_URL }}" ]; then
+            echo "::warning::PROD_URL secret not set. Add it in repo Settings → Secrets to run load test against prod."
+            echo "SKIP_K6=true" >> $GITHUB_ENV
+          else
+            echo "BASE_URL=${{ secrets.PROD_URL }}" >> $GITHUB_ENV
+          fi
+
+      - name: Run k6
+        if: env.SKIP_K6 != 'true'
+        uses: grafana/k6-action@v0.4.0
+        with:
+          filename: scripts/load/k6-prod.js
+          cloud: false
+        env:
+          BASE_URL: ${{ secrets.PROD_URL }}
+        continue-on-error: true
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Load test (prod) finished" >> $GITHUB_STEP_SUMMARY
+          echo "Set \`PROD_URL\` secret to run against prod ALB. Metrics in Grafana at \`/grafana\` (prod)." >> $GITHUB_STEP_SUMMARY

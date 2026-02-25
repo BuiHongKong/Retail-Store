@@ -37,3 +37,9 @@ output "rds_endpoint" {
   description = "RDS endpoint (if created)"
   value       = var.create_rds && length(aws_db_instance.main) > 0 ? aws_db_instance.main[0].address : null
 }
+
+# MONITORING: URL truy cập Grafana (sau khi apply observability)
+output "grafana_url" {
+  description = "Grafana URL (append to prod_url)"
+  value       = "http://${aws_lb.main.dns_name}/grafana"
+}

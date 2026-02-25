@@ -1,14 +1,17 @@
 require("dotenv").config();
 const express = require("express");
 const adminRouter = require("../services/admin/router");
+const metrics = require("../services/metrics");
 
 const app = express();
 const PORT = process.env.ADMIN_PORT || 3004;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
 
 app.use(express.json());
+app.use(metrics.middleware);
 
 app.get("/health", (req, res) => res.sendStatus(200));
+app.get("/metrics", metrics.handler);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;

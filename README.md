@@ -357,7 +357,7 @@ Thư mục **terraform-staging/** (region mặc định **ap-southeast-1**): VPC
 - **Quick start:** `cp terraform.tfvars.example terraform.tfvars` → sửa `db_password` (nếu `create_rds = true`) hoặc `create_rds = false` và `database_url` → `terraform init` → `terraform plan` → `terraform apply`.
 - **Biến quan trọng:** `aws_region`, `enable_nat_gateway`, `create_rds`, `db_password`, `database_url`.
 - **Outputs:** `staging_url`, `ecr_frontend_url`, `ecr_backend_url`, `ecs_cluster_name`.
-- **Seed DB (một lần):** Trong `terraform-staging/` chạy `bash run-seed-once.sh` (Git Bash, cần `jq`). User demo: `demo@example.com` / `demo123`, Admin: `admin@example.com` / `admin123`.
+- **Seed DB staging:** Tự chạy trong pipeline khi push `main` (step "Seed database"). User demo: `demo@example.com` / `demo123`, Admin: `admin@example.com` / `admin123`. Prod: chạy workflow **Seed Prod Database** (Actions, một lần).
 - **State:** Mặc định local; muốn S3 thì bỏ comment block `backend "s3"` trong `provider.tf`.
 
 ### Điều kiện — Terraform Production
@@ -425,6 +425,9 @@ Mở `http://localhost:8080` (frontend); API cần trỏ tới backend (path `/a
 | `.github/workflows/promote-to-prod.yml` | Manual: push `main` sang prod repo. |
 | `.github/workflows/examples/deploy-prod.yml.example` | Mẫu workflow deploy prod (copy vào prod repo). |
 | `.github/workflows/examples/rollback-prod.yml.example` | Mẫu workflow rollback prod (copy vào prod repo). |
+| `.github/workflows/load-test-prod.yml` | Optional: scheduled/manual k6 load test; cần secret `PROD_URL`. |
+
+**Monitoring & giả lập user (chỉ prod):** xem [MONITORING.md](MONITORING.md).
 
 ---
 
