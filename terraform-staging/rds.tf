@@ -29,4 +29,3 @@ resource "aws_db_instance" "main" {
 locals {
   database_url = var.database_url != "" ? var.database_url : (var.create_rds && length(aws_db_instance.main) > 0 ? "postgresql://postgres:${var.db_password}@${aws_db_instance.main[0].address}:5432/retail_store" : "")
 }
-# pust test
