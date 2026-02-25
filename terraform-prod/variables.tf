@@ -64,14 +64,14 @@ variable "jwt_secret" {
   description = "JWT secret for auth service"
   type        = string
   sensitive   = true
-  default     = "change-me-in-production"
+  default     = ""
 }
 
 variable "admin_jwt_secret" {
   description = "Admin JWT secret"
   type        = string
   sensitive   = true
-  default     = "change-me-in-production"
+  default     = ""
 }
 
 # MONITORING: mật khẩu đăng nhập Grafana (UI tại /grafana)
@@ -79,5 +79,5 @@ variable "grafana_admin_password" {
   description = "Grafana admin password (observability)"
   type        = string
   sensitive   = true
-  default     = "admin"
+  default     = ""
 }
