@@ -87,6 +87,15 @@ Trong Grafana:
   1. **Prometheus UI** (nếu truy cập được, ví dụ port-forward ECS task Prometheus 9090): **Status → Targets**. Phải thấy 5 target: main, cart, checkout, auth, admin đều **UP**. Nếu Down: kiểm tra security group (observability SG → ECS 3000–3004), service discovery (ECS backend có `service_registries`), và task đang chạy.
   2. **Grafana → Explore**, datasource Prometheus: chạy `up{job=~"main|cart|checkout|auth|admin"}` → phải có 5 series, value 1. Sau đó thử `auth_logins_total` (có data sau khi có login), `product_sales_total` (có data sau khi có checkout thành công).
 
+### Nếu Grafana hiển thị "No data" (trong khi Loki có log)
+
+- **Nguyên nhân thường gặp:** Prometheus không scrape được backend (targets Down) hoặc Grafana không kết nối được Prometheus.
+- **Cách xử lý:**
+  1. **Grafana → Connections → Data sources → Prometheus → Save & test.** Nếu báo lỗi: Grafana không resolve được `prometheus.retail-store.local` hoặc không kết nối được — kiểm tra ECS task Prometheus đang chạy và cùng VPC.
+  2. **Kiểm tra Prometheus Targets:** Vào Prometheus UI (Status → Targets). Nếu main, cart, checkout, auth, admin là **DOWN**: Prometheus không scrape được app — kiểm tra rule security group cho phép **observability SG → ECS SG** ingress port 3000–3004 (`terraform-prod/observability.tf`: `ecs_allow_observability_scrape`), và ECS backend services có `service_registries` trỏ tới service discovery.
+  3. **Grafana Explore:** Chọn datasource Prometheus, chạy `up`. Nếu không có series: Prometheus chưa có dữ liệu từ bất kỳ target nào (xem lại bước 2). Nếu có `up{job="prometheus"}` nhưng không có job main/cart/...: chỉ có Prometheus self-scrape hoạt động, các backend target Down.
+  4. Sau khi sửa cấu hình (Terraform hoặc security group), cần **redeploy** task Prometheus (ví dụ ECS → force new deployment) để áp dụng thay đổi.
+
 ### Bước 8: Import dashboard ứng dụng
 
 Để xem request rate, latency, 5xx theo service:

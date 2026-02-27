@@ -18,8 +18,11 @@ scrape_configs:
           - '${svc.name}.${namespace_name}'
         type: 'A'
         port: ${svc.port}
+        refresh_interval: 15s
     metrics_path: /metrics
+    scheme: http
     scrape_interval: 15s
+    scrape_timeout: 10s
     # instance = <resolved_ip>:port; job = ${svc.name} (dùng trong Grafana by (job))
 %{endfor ~}
   - job_name: 'prometheus'
