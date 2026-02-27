@@ -32,9 +32,9 @@ module "observability" {
 
   grafana_admin_password = var.grafana_admin_password
   enable_grafana_alb     = true
-  grafana_image          = "${aws_ecr_repository.grafana.repository_url}:latest"
+  grafana_image          = var.build_grafana_image ? "${aws_ecr_repository.grafana.repository_url}:latest" : "grafana/grafana:latest"
 
-  depends_on = [null_resource.grafana_build]
+  depends_on = var.build_grafana_image ? [null_resource.grafana_build[0]] : []
 }
 
 # Allow Prometheus (observability SG) to scrape app ECS on ports 3000-3004

@@ -7,6 +7,7 @@ locals {
 }
 
 resource "null_resource" "grafana_build" {
+  count = var.build_grafana_image ? 1 : 0
   triggers = {
     dockerfile       = filemd5("${path.module}/modules/observability/grafana/Dockerfile")
     datasources      = filemd5("${path.module}/modules/observability/grafana/provisioning/datasources/datasources.yaml")

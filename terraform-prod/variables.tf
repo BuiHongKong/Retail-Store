@@ -87,3 +87,10 @@ variable "grafana_admin_password" {
   sensitive   = true
   default     = ""
 }
+
+# Set false khi chạy terraform apply trên máy không có Docker; Grafana dùng image public. Set true trên CI/máy có Docker để build image custom (dashboard + datasource sẵn).
+variable "build_grafana_image" {
+  description = "Build and push custom Grafana image to ECR (requires Docker). Set false to skip when running apply without Docker."
+  type        = bool
+  default     = false
+}
