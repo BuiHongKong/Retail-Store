@@ -101,11 +101,13 @@ export default function () {
 
   const slug = randomItem(PRODUCT_SLUGS);
   res = http.get(`${BASE_URL}/api/products/${slug}`);
-  check(res, (r) => r.status === 200 && r.json("slug"));
+  const productOk = check(res, (r) => r.status === 200 && r.json("slug"));
+  if (!productOk) return;
   const productId = res.json("id"); // UUID from DB — cart/likes API require this, not slug
+  if (!productId) return;
   sleep(0.2);
 
-  // --- 4. Cart: get cart → add item
+  // --- 4. Cart: get cart → add item (bắt buộc thành công thì mới checkout)
   res = http.get(`${BASE_URL}/api/cart`, { headers });
   check(res, (r) => r.status === 200);
   sleep(0.2);
@@ -115,7 +117,8 @@ export default function () {
     JSON.stringify({ productId, quantity: 1 }),
     { headers }
   );
-  check(res, (r) => r.status === 200 || r.status === 201);
+  const addCartOk = check(res, (r) => r.status === 200 || r.status === 201);
+  if (!addCartOk) return; // giỏ trống → bỏ qua checkout, tránh 400 Cart is empty
   sleep(0.3);
 
   // --- 5. Checkout preview
