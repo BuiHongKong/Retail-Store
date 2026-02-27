@@ -79,7 +79,15 @@ Trong Grafana:
 - Vào **Connections → Data sources**. Sẽ thấy **Prometheus** đã được cấu hình (URL `http://prometheus.retail-store.local:9090`).
 - Mở datasource Prometheus → nút **Save & test**. Nếu **Success**, Prometheus đang scrape được; nếu lỗi, kiểm tra ECS task Prometheus đã chạy và service discovery trong VPC prod.
 
-### Bước 7: Import dashboard ứng dụng
+### Bước 7: Kiểm tra metrics và Prometheus scrape
+
+- **Backend:** Mỗi server (main, cart, checkout, auth, admin) đăng ký metric trong `backend/services/metrics.js` (một register chung) và expose **GET /metrics** tại root (không phải /api/metrics). Chỉ **auth** tăng `auth_logins_total`; chỉ **checkout** tăng `product_sales_total` và `checkout_payments_total`.
+- **Prometheus:** Scrape từng backend qua DNS `&lt;svc&gt;.retail-store.local:&lt;port&gt;`, `metrics_path: /metrics`, `job_name` = tên service (main, cart, checkout, auth, admin). Cấu hình từ `terraform-prod/modules/observability/prometheus.yml.tpl`.
+- **Cách kiểm tra:**
+  1. **Prometheus UI** (nếu truy cập được, ví dụ port-forward ECS task Prometheus 9090): **Status → Targets**. Phải thấy 5 target: main, cart, checkout, auth, admin đều **UP**. Nếu Down: kiểm tra security group (observability SG → ECS 3000–3004), service discovery (ECS backend có `service_registries`), và task đang chạy.
+  2. **Grafana → Explore**, datasource Prometheus: chạy `up{job=~"main|cart|checkout|auth|admin"}` → phải có 5 series, value 1. Sau đó thử `auth_logins_total` (có data sau khi có login), `product_sales_total` (có data sau khi có checkout thành công).
+
+### Bước 8: Import dashboard ứng dụng
 
 Để xem request rate, latency, 5xx theo service:
 

@@ -1,8 +1,10 @@
 # -----------------------------------------------------------------------------
 # MONITORING — Cấu hình scrape của Prometheus (template, inject vào container)
 # -----------------------------------------------------------------------------
-# DNS service discovery: main.retail-store.local:3000, cart.retail-store.local:3001, ...
-# Mỗi job scrape GET /metrics của từng backend. backend_services và namespace_name từ Terraform.
+# DNS: <svc>.retail-store.local (A record từ ECS service discovery). Mỗi backend
+# expose GET /metrics (prom-client). Các metric business: auth_logins_total (auth),
+# product_sales_total, checkout_payments_total (checkout). Kiểm tra: Prometheus
+# UI → Status → Targets (main,cart,checkout,auth,admin phải UP).
 # -----------------------------------------------------------------------------
 global:
   scrape_interval: 15s
@@ -18,7 +20,7 @@ scrape_configs:
         port: ${svc.port}
     metrics_path: /metrics
     scrape_interval: 15s
-
+    # instance = <resolved_ip>:port; job = ${svc.name} (dùng trong Grafana by (job))
 %{endfor ~}
   - job_name: 'prometheus'
     static_configs:
