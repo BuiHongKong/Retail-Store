@@ -439,3 +439,4 @@ Mở `http://localhost:8080` (frontend); API cần trỏ tới backend (path `/a
 - **API định hướng:** `GET /api/categories`, `GET /api/products` (query `?categoryId=`, `?page=`, `?pageSize=`), `GET /api/products/:slug`. Cart: `GET/POST/PATCH/DELETE /api/cart` (items + product info); validate productId tồn tại, quantity ≤ stock.
 - **Lưu ý:** imageUrl production nên dùng CDN/storage URL; price lưu integer (VND); stock cập nhật khi có order.
 
+push
