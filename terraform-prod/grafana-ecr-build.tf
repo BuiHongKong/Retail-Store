@@ -11,7 +11,8 @@ resource "null_resource" "grafana_build" {
     dockerfile       = filemd5("${path.module}/modules/observability/grafana/Dockerfile")
     datasources      = filemd5("${path.module}/modules/observability/grafana/provisioning/datasources/datasources.yaml")
     dashboards       = filemd5("${path.module}/modules/observability/grafana/provisioning/dashboards/dashboards.yaml")
-    dashboard_json   = filemd5("${path.module}/modules/observability/grafana/provisioning/dashboards/json/retail-store-app.json")
+    dashboard_infra    = filemd5("${path.module}/modules/observability/grafana/provisioning/dashboards/json/retail-store-app.json")
+    dashboard_business = filemd5("${path.module}/modules/observability/grafana/provisioning/dashboards/json/retail-store-business.json")
   }
   provisioner "local-exec" {
     command = <<-EOT
