@@ -128,3 +128,5 @@ Script **scripts/load/k6-prod.js** mô phỏng traffic vào **prod**: xem catego
 - **GitHub Actions:** Đặt secret **PROD_URL** (vd `http://<prod-alb-dns>`) trong repo, rồi chạy workflow **Load test (prod)** (manual hoặc theo lịch cron).
 
 Metrics xem trên Grafana prod tại `/grafana`.
+
+push
