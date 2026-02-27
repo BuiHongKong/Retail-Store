@@ -102,6 +102,7 @@ export default function () {
   const slug = randomItem(PRODUCT_SLUGS);
   res = http.get(`${BASE_URL}/api/products/${slug}`);
   check(res, (r) => r.status === 200 && r.json("slug"));
+  const productId = res.json("id"); // UUID from DB — cart/likes API require this, not slug
   sleep(0.2);
 
   // --- 4. Cart: get cart → add item
@@ -111,7 +112,7 @@ export default function () {
 
   res = http.post(
     `${BASE_URL}/api/cart/items`,
-    JSON.stringify({ productId: `prod-${slug}`, quantity: 1 }),
+    JSON.stringify({ productId, quantity: 1 }),
     { headers }
   );
   check(res, (r) => r.status === 200 || r.status === 201);
@@ -149,12 +150,12 @@ export default function () {
   sleep(0.2);
   res = http.post(
     `${BASE_URL}/api/likes/items`,
-    JSON.stringify({ productId: `prod-${slug}` }),
+    JSON.stringify({ productId }),
     { headers }
   );
   check(res, (r) => r.status === 200 || r.status === 201);
   sleep(0.5);
-  res = http.del(`${BASE_URL}/api/likes/items/prod-${slug}`, null, { headers });
+  res = http.del(`${BASE_URL}/api/likes/items/${productId}`, null, { headers });
   check(res, (r) => r.status === 200 || r.status === 204);
   sleep(1);
 }
