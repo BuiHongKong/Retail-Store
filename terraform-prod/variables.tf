@@ -92,5 +92,5 @@ variable "grafana_admin_password" {
 variable "build_grafana_image" {
   description = "Build and push custom Grafana image to ECR (requires Docker). Set false to skip when running apply without Docker."
   type        = bool
-  default     = false
+  default     = true
 }

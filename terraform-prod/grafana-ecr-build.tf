@@ -1,5 +1,6 @@
 # Build and push custom Grafana image (grafana:latest + provisioned dashboards).
 # Requires: Docker and AWS CLI on the machine running terraform apply.
+# Trên Windows không có Docker: chạy workflow "Terraform Prod" (Actions) thay vì apply local.
 # Uses data.aws_caller_identity.current from ecs.tf.
 # -----------------------------------------------------------------------------
 locals {

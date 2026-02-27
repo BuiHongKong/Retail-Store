@@ -1,0 +1,50 @@
+# -----------------------------------------------------------------------------
+# Terraform Prod — Apply infra prod; build Grafana image trên runner (có Docker).
+# Chạy: Actions → Terraform Prod → Run workflow.
+# Cần: Secrets AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ACCOUNT_ID;
+#      TF_VAR_db_password, TF_VAR_grafana_admin_password, TF_VAR_jwt_secret, TF_VAR_admin_jwt_secret.
+# State: nếu dùng local backend, state trên runner sẽ mất sau run — nên bật S3 backend trong terraform-prod/provider.tf.
+# -----------------------------------------------------------------------------
+name: Terraform Prod
+on:
+  workflow_dispatch:
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5"
+          terraform_wrapper: false
+
+      - name: Terraform Init (prod)
+        working-directory: terraform-prod
+        run: terraform init
+
+      - name: Terraform Apply (prod, build Grafana image)
+        working-directory: terraform-prod
+        env:
+          TF_VAR_build_grafana_image: "true"
+          TF_VAR_db_password: ${{ secrets.TF_VAR_db_password }}
+          TF_VAR_grafana_admin_password: ${{ secrets.TF_VAR_grafana_admin_password }}
+          TF_VAR_jwt_secret: ${{ secrets.TF_VAR_jwt_secret }}
+          TF_VAR_admin_jwt_secret: ${{ secrets.TF_VAR_admin_jwt_secret }}
+        run: terraform apply -auto-approve -var="build_grafana_image=true"
+
+      - name: Summary
+        run: |
+          echo "## Terraform Prod apply done" >> $GITHUB_STEP_SUMMARY
+          echo "Grafana image built and pushed. Force new deployment Grafana (ECS) nếu chưa tự rollout." >> $GITHUB_STEP_SUMMARY
