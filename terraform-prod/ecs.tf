@@ -126,7 +126,9 @@ resource "aws_ecs_task_definition" "backend" {
         [
           { name = "JWT_SECRET", value = var.jwt_secret },
           { name = "ADMIN_JWT_SECRET", value = var.admin_jwt_secret },
-          { name = "WRITE_LOG_FILE", value = "/var/log/app/app.log" }
+          { name = "WRITE_LOG_FILE", value = "/var/log/app/app.log" },
+          { name = "S3_BUCKET", value = aws_s3_bucket.uploads.bucket },
+          { name = "AWS_REGION", value = var.aws_region }
         ]
       )
       logConfiguration = {

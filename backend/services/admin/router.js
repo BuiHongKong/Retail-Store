@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const { PrismaClient } = require("@prisma/client");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -13,18 +14,24 @@ const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET || "admin-change-me-in-pro
 const ADMIN_JWT_EXPIRES_IN = process.env.ADMIN_JWT_EXPIRES_IN || "8h";
 const SALT_ROUNDS = 10;
 
+const USE_S3 = !!process.env.S3_BUCKET;
+const AWS_REGION = process.env.AWS_REGION || "ap-southeast-1";
+const s3 = USE_S3 ? new S3Client({ region: AWS_REGION }) : null;
+
 const UPLOADS_DIR = path.join(__dirname, "..", "..", "uploads");
-if (!fs.existsSync(UPLOADS_DIR)) {
+if (!USE_S3 && !fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname) || ".bin";
-    cb(null, `${crypto.randomUUID()}${ext}`);
-  },
-});
+const storage = USE_S3
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
+      filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname) || ".bin";
+        cb(null, `${crypto.randomUUID()}${ext}`);
+      },
+    });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB
 
 function createAdminToken(payload) {
@@ -302,11 +309,32 @@ router.delete("/admin/products/:id", adminMiddleware, async (req, res) => {
   }
 });
 
-/** POST /admin/upload — multipart, 1 file */
-router.post("/admin/upload", adminMiddleware, upload.single("file"), (req, res) => {
+/** POST /admin/upload — multipart, 1 file. S3 on AWS (S3_BUCKET set), else local disk. */
+router.post("/admin/upload", adminMiddleware, upload.single("file"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
   }
+  const ext = path.extname(req.file.originalname) || ".bin";
+  const filename = `${crypto.randomUUID()}${ext}`;
+
+  if (USE_S3 && s3) {
+    try {
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.S3_BUCKET,
+          Key: `uploads/${filename}`,
+          Body: req.file.buffer,
+          ContentType: req.file.mimetype || "application/octet-stream",
+        })
+      );
+      const url = `https://${process.env.S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/uploads/${filename}`;
+      return res.json({ url });
+    } catch (err) {
+      console.error("S3 upload error:", err);
+      return res.status(500).json({ error: "Upload failed" });
+    }
+  }
+
   const url = `/uploads/${req.file.filename}`;
   res.json({ url });
 });

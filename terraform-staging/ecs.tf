@@ -115,7 +115,9 @@ resource "aws_ecs_task_definition" "backend" {
       local.database_url != "" ? [{ name = "DATABASE_URL", value = local.database_url }] : [],
       [
         { name = "JWT_SECRET", value = var.jwt_secret },
-        { name = "ADMIN_JWT_SECRET", value = var.admin_jwt_secret }
+        { name = "ADMIN_JWT_SECRET", value = var.admin_jwt_secret },
+        { name = "S3_BUCKET", value = aws_s3_bucket.uploads.bucket },
+        { name = "AWS_REGION", value = var.aws_region }
       ]
     )
     logConfiguration = {
