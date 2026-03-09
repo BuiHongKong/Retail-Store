@@ -42,7 +42,7 @@ Vẫn trong **terraform-prod**:
    ```bash
    terraform plan
    ```
-   Kỳ vọng: tạo **service discovery** (namespace `retail-store.local`, các service backend + prometheus), cập nhật **ECS service** backend (thêm `service_registries`), tạo **module observability** (security group, log groups, task definitions và ECS services cho Prometheus, Grafana, Loki), thêm **ALB listener rule** `/grafana` → Grafana, thêm **security group rule** cho phép Prometheus scrape app (port 3000–3004).
+   Kỳ vọng: tạo **service discovery** (namespace `retail-store.local`, các service backend + prometheus), cập nhật **ECS service** backend (thêm `service_registries`), tạo **module observability** (security group, log groups, task definitions và ECS services cho Prometheus, Grafana, Loki), thêm **ALB listener rule** `/grafana` → Grafana, **security group rule** cho Prometheus scrape app (port 3000–3004) và Node Exporter (port 9100). Backend task definition có sidecar **Node Exporter** (port 9100).
 
 3. **Áp dụng:**
    ```bash
@@ -113,20 +113,18 @@ Dashboard **Retail Store - App metrics** sẽ hiển thị các panel: request r
 Stack deploy qua **terraform-prod** (module `terraform-prod/modules/observability`).
 
 - **Grafana:** truy cập qua ALB prod path **/grafana** (vd `http://<prod-alb-dns>/grafana`). Lấy URL từ Terraform output: `terraform output grafana_url` trong thư mục `terraform-prod`. Đăng nhập admin với mật khẩu trong biến `grafana_admin_password`. Datasource Prometheus đã cấu hình (scrape app prod qua service discovery).
-- **Prometheus:** scrape `/metrics` của từng backend prod (main, cart, checkout, auth, admin) qua DNS `*.retail-store.local`.
+- **Prometheus:** scrape `/metrics` của từng backend prod (main, cart, checkout, auth, admin) qua DNS `*.retail-store.local` (port 3000–3004). Scrape **Node Exporter** (sidecar trên mỗi task backend) qua cùng DNS, port **9100** (job `main-node`, `cart-node`, …).
 - **Loki:** chạy trong cluster prod; có thể thêm Loki làm datasource trong Grafana (URL `http://loki.retail-store.local:3100`) nếu ship log tới Loki.
 
-Backend expose **GET /metrics** (prom-client) trên mọi server; Prometheus thu thập `http_requests_total`, `http_request_duration_seconds`. Import dashboard có sẵn: trong Grafana → Import → upload file `terraform-prod/modules/observability/grafana-dashboard.json`.
+Backend expose **GET /metrics** (prom-client) trên mọi server; Prometheus thu thập `http_requests_total`, `http_request_duration_seconds`. Mỗi task backend chạy thêm **Node Exporter** (port 9100) để có CPU/memory theo task. **Hai dashboard** provisioned: **Retail Store - Infra** (request rate, duration, 5xx, total requests, CPU/memory Node Exporter, Loki logs) và **Retail Store - Business** (login rate, checkouts, top products, sales by category).
 
 ---
 
 ## Giả lập user (k6)
 
-Script **scripts/load/k6-prod.js** mô phỏng traffic vào **prod**: xem categories, products, chi tiết sản phẩm, thêm giỏ, checkout preview, likes.
+Script **scripts/load/k6-prod.js** mô phỏng traffic vào **prod**: đăng ký → đăng nhập → chi tiết sản phẩm → giỏ hàng → thêm vào giỏ → POST checkout (đặt hàng).
 
 - **Chạy local:** `k6 run -e BASE_URL=http://<prod-alb> scripts/load/k6-prod.js`
 - **GitHub Actions:** Đặt secret **PROD_URL** (vd `http://<prod-alb-dns>`) trong repo, rồi chạy workflow **Load test (prod)** (manual hoặc theo lịch cron).
 
 Metrics xem trên Grafana prod tại `/grafana`.
-
-push

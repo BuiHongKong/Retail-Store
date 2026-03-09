@@ -25,6 +25,20 @@ scrape_configs:
     scrape_timeout: 10s
     # instance = <resolved_ip>:port; job = ${svc.name} (dùng trong Grafana by (job))
 %{endfor ~}
+# Node Exporter (sidecar on each backend task; same DNS, port 9100)
+%{for svc in backend_services ~}
+  - job_name: '${svc.name}-node'
+    dns_sd_configs:
+      - names:
+          - '${svc.name}.${namespace_name}'
+        type: 'A'
+        port: 9100
+        refresh_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    scrape_interval: 15s
+    scrape_timeout: 10s
+%{endfor ~}
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']

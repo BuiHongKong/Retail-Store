@@ -157,6 +157,20 @@ resource "aws_ecs_task_definition" "backend" {
           "awslogs-stream-prefix" = "promtail"
         }
       }
+    },
+    {
+      name  = "node-exporter"
+      image = "prom/node-exporter:v1.6.1"
+      essential = false
+      portMappings = [{ containerPort = 9100, protocol = "tcp" }]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/${var.project_name}-${var.environment}-${each.value.name}"
+          "awslogs-region"        = var.aws_region
+          "awslogs-stream-prefix" = "node-exporter"
+        }
+      }
     }
   ])
 }

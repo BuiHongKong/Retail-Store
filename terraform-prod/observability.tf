@@ -47,3 +47,14 @@ resource "aws_security_group_rule" "ecs_allow_observability_scrape" {
   source_security_group_id = module.observability.observability_security_group_id
   description              = "Prometheus scrape app /metrics"
 }
+
+# Allow Prometheus to scrape Node Exporter on backend ECS (port 9100)
+resource "aws_security_group_rule" "ecs_allow_observability_node_exporter" {
+  type                     = "ingress"
+  from_port                = 9100
+  to_port                  = 9100
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.ecs.id
+  source_security_group_id = module.observability.observability_security_group_id
+  description              = "Prometheus scrape Node Exporter"
+}
