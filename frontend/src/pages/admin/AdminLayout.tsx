@@ -57,12 +57,6 @@ export function AdminLayout() {
             >
               {t("admin.layout.products")}
             </Link>
-            <Link
-              to="/admin/categories"
-              className={location.pathname.startsWith("/admin/categories") ? "admin-sidebar__link admin-sidebar__link--active" : "admin-sidebar__link"}
-            >
-              {t("admin.layout.categories")}
-            </Link>
           </nav>
           <div className="admin-sidebar__user">
             <LanguageSwitcher />

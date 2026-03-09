@@ -15,7 +15,6 @@ import { AdminLayout } from "./pages/admin/AdminLayout";
 import { AdminLoginPage } from "./pages/admin/AdminLogin";
 import { AdminOrdersPage } from "./pages/admin/AdminOrders";
 import { AdminProductsPage } from "./pages/admin/AdminProducts";
-import { AdminCategoriesPage } from "./pages/admin/AdminCategories";
 import "./App.css";
 
 function App() {
@@ -39,7 +38,6 @@ function App() {
                   <Route index element={<AdminOrdersPage />} />
                   <Route path="login" element={<AdminLoginPage />} />
                   <Route path="products" element={<AdminProductsPage />} />
-                  <Route path="categories" element={<AdminCategoriesPage />} />
                 </Route>
               </Routes>
             </LikesProvider>
