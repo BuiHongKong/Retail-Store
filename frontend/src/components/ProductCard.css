@@ -1,7 +1,7 @@
 /* Bright confetti — pastel card */
 .product-card {
   max-width: 340px;
-  max-height: 500px;
+  height: 500px;
   margin: 0 auto;
   border-radius: 20px;
   overflow: hidden;
@@ -10,6 +10,8 @@
   box-shadow: var(--shadow-card);
   text-align: center;
   transition: transform 0.2s, border-color 0.2s, border-width 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
 }
 
 .product-card:hover {
@@ -41,6 +43,7 @@
 .product-card__image-wrap {
   position: relative;
   aspect-ratio: 1;
+  flex-shrink: 0;
   background: linear-gradient(180deg, rgba(245, 240, 252, 0.98) 0%, rgba(254, 240, 245, 0.98) 100%);
   border-radius: 20px 20px 0 0;
   overflow: hidden;
@@ -98,6 +101,10 @@
 .product-card__body {
   padding: 1.25rem 1.25rem 1.5rem;
   text-align: center;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .product-card__name {
@@ -117,6 +124,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
 }
 
 .product-card__rating {
@@ -143,6 +151,7 @@
 
 .product-card__add-cart {
   display: inline-block;
+  margin-top: auto;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
   font-weight: 600;
@@ -170,7 +179,7 @@
 @media (max-width: 640px) {
   .product-card {
     max-width: none;
-    max-height: none;
+    height: auto;
   }
   .product-card__body {
     padding: 1rem 1rem 1.25rem;
