@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import {
   getAdminCategories,
   createCategory,
-  updateCategory,
   type AdminCategory,
 } from "../../admin/api";
 import "./AdminCategories.css";
@@ -13,7 +12,6 @@ export function AdminCategoriesPage() {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ slug: "", name: "", description: "", sortOrder: 0 });
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -32,20 +30,7 @@ export function AdminCategoriesPage() {
 
   const resetForm = () => {
     setForm({ slug: "", name: "", description: "", sortOrder: categories.length });
-    setEditingId(null);
     setShowForm(false);
-    setSubmitError(null);
-  };
-
-  const handleEdit = (c: AdminCategory) => {
-    setEditingId(c.id);
-    setForm({
-      slug: c.slug,
-      name: c.name,
-      description: c.description ?? "",
-      sortOrder: c.sortOrder,
-    });
-    setShowForm(true);
     setSubmitError(null);
   };
 
@@ -54,20 +39,12 @@ export function AdminCategoriesPage() {
     setSubmitError(null);
     setSubmitting(true);
     try {
-      if (editingId) {
-        await updateCategory(editingId, {
-          name: form.name,
-          description: form.description || undefined,
-          sortOrder: form.sortOrder,
-        });
-      } else {
-        await createCategory({
-          slug: form.slug.trim(),
-          name: form.name.trim(),
-          description: form.description.trim() || undefined,
-          sortOrder: form.sortOrder,
-        });
-      }
+      await createCategory({
+        slug: form.slug.trim(),
+        name: form.name.trim(),
+        description: form.description.trim() || undefined,
+        sortOrder: form.sortOrder,
+      });
       resetForm();
       load();
     } catch (e) {
@@ -112,20 +89,18 @@ export function AdminCategoriesPage() {
 
       {showForm && (
         <form className="admin-categories__form" onSubmit={handleSubmit}>
-          <h2 className="admin-categories__form-title">{editingId ? t("admin.categories.formEdit") : t("admin.categories.formAdd")}</h2>
-          {!editingId && (
-            <div className="admin-categories__field">
-              <label className="admin-categories__label">{t("admin.categories.slug")}</label>
-              <input
-                type="text"
-                className="admin-categories__input"
-                value={form.slug}
-                onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                placeholder="slug-danh-muc"
-                required
-              />
-            </div>
-          )}
+          <h2 className="admin-categories__form-title">{t("admin.categories.formAdd")}</h2>
+          <div className="admin-categories__field">
+            <label className="admin-categories__label">{t("admin.categories.slug")}</label>
+            <input
+              type="text"
+              className="admin-categories__input"
+              value={form.slug}
+              onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
+              placeholder="slug-danh-muc"
+              required
+            />
+          </div>
           <div className="admin-categories__field">
             <label className="admin-categories__label">{t("admin.categories.name")}</label>
             <input
@@ -179,7 +154,6 @@ export function AdminCategoriesPage() {
                 <th>{t("admin.categories.slug")}</th>
                 <th>{t("admin.categories.name")}</th>
                 <th>{t("admin.categories.sortOrder")}</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -188,11 +162,6 @@ export function AdminCategoriesPage() {
                   <td className="admin-categories__slug">{c.slug}</td>
                   <td>{c.name}</td>
                   <td>{c.sortOrder}</td>
-                  <td>
-                    <button type="button" className="admin-categories__edit-btn" onClick={() => handleEdit(c)}>
-                      {t("admin.categories.edit")}
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>

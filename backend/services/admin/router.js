@@ -181,27 +181,6 @@ router.post("/admin/categories", adminMiddleware, async (req, res) => {
   }
 });
 
-/** PATCH /admin/categories/:id */
-router.patch("/admin/categories/:id", adminMiddleware, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const body = req.body || {};
-    const data = {};
-    if (body.name != null && String(body.name).trim() !== "") data.name = String(body.name).trim();
-    if (body.description !== undefined) data.description = body.description ? String(body.description).trim() : null;
-    if (body.sortOrder !== undefined) data.sortOrder = Number(body.sortOrder) || 0;
-    const category = await prisma.category.update({
-      where: { id },
-      data,
-    });
-    res.json(category);
-  } catch (err) {
-    if (err.code === "P2025") return res.status(404).json({ error: "Category not found" });
-    console.error(err);
-    res.status(500).json({ error: "Failed to update category" });
-  }
-});
-
 /** GET /admin/products */
 router.get("/admin/products", adminMiddleware, async (req, res) => {
   try {

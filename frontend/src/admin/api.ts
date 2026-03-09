@@ -130,20 +130,6 @@ export async function createCategory(body: {
   return data;
 }
 
-export async function updateCategory(
-  id: string,
-  body: { name?: string; description?: string; sortOrder?: number }
-): Promise<AdminCategory> {
-  const res = await fetch(`${API_BASE}/admin/categories/${id}`, {
-    method: "PATCH",
-    headers: adminHeaders(),
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to update category");
-  return data;
-}
-
 export interface AdminProduct {
   id: string;
   slug: string;
