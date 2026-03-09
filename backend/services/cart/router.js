@@ -18,7 +18,7 @@ async function getOrCreateCart(sessionId) {
     });
     if (cart) return cart;
   }
-  const newSessionId = crypto.randomUUID();
+  const newSessionId = (sessionId && String(sessionId).trim()) ? String(sessionId).trim() : crypto.randomUUID();
   return prisma.cart.create({
     data: { sessionId: newSessionId },
     include: cartInclude,
