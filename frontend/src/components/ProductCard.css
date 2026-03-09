@@ -113,6 +113,10 @@
   font-size: 0.9rem;
   color: var(--text-soft);
   line-height: 1.4;
+  max-height: 6.5em;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .product-card__rating {
