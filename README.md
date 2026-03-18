@@ -48,6 +48,7 @@ Thư mục **terraform-prod/**: infrastructure production (VPC, ECR, ALB, ECS Fa
 - **Quick start:** `cp terraform.tfvars.example terraform.tfvars` → sửa `db_password`, **bắt buộc đổi** `jwt_secret`, `admin_jwt_secret` khác staging → (nếu S3) bỏ comment `backend "s3"`, key `prod/terraform.tfstate` — **phải khác** staging → `terraform init` → `terraform plan` → `terraform apply`.
 - **Biến quan trọng:** `vpc_cidr` (mặc định `10.1.0.0/16`), `create_rds`, `db_password`, `ecr_frontend_name`, `ecr_backend_name`.
 - **Outputs:** `prod_url`, `ecr_frontend_url`, `ecr_backend_url`, `ecs_cluster_name`.
+- **Auto-scaling:** Xem mục [ECS Auto-scaling](#ecs-auto-scaling) bên dưới.
 
 ### GitHub — Staging repo
 
@@ -73,6 +74,19 @@ Secrets: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_ACCOUNT_ID`. Variabl
 - **CI** (`.github/workflows/ci.yml`): push/PR lên `main` hoặc `develop` — lint frontend.
 - **Deploy to Staging** (`.github/workflows/deploy-staging.yml`): push/merge vào `main` — build Docker, push ECR `staging-<sha>` và `staging-latest`, update ECS 6 service staging.
 - **Promote to Prod Repo** (`.github/workflows/promote-to-prod.yml`): manual — đẩy `main` sang prod repo.
+
+### ECS Auto-scaling (chỉ Production)
+
+Chỉ **terraform-prod**: mỗi ECS service (frontend + 5 backend) có **Application Auto Scaling** với target tracking theo **CPU 70%**:
+
+| Service | Min | Max | Ghi chú |
+|---------|-----|-----|--------|
+| Frontend, Main, Cart, Checkout | 1 | 6 | Scale theo tải chính |
+| Auth, Admin | 1 | 2 | Ít traffic, max thấp |
+
+- **Metric:** `ECSServiceAverageCPUUtilization` — scale out khi trung bình > 70%, scale in khi < 70%.
+- **Cooldown:** scale-out 60s, scale-in 180s (tránh dao động).
+- **File Terraform:** `terraform-prod/ecs_autoscaling.tf`. Sau `terraform apply` (prod), scaling áp dụng ngay; không cần đổi code ứng dụng (Cart/Likes/Session đã lưu DB, stateless).
 
 ### Staging URL
 
@@ -106,6 +120,7 @@ Mở `http://localhost:8080` (frontend); API cần trỏ tới backend (path `/a
 | `.github/workflows/examples/deploy-prod.yml.example` | Mẫu workflow deploy prod (copy vào prod repo). |
 | `.github/workflows/examples/rollback-prod.yml.example` | Mẫu workflow rollback prod (copy vào prod repo). |
 | `.github/workflows/load-test-prod.yml` | Optional: scheduled/manual k6 load test; cần secret `PROD_URL`. |
+| `terraform-prod/ecs_autoscaling.tf` | ECS Auto Scaling (chỉ prod): CPU 70%; frontend/main/cart/checkout max 6, auth/admin max 2. |
 
 **Monitoring & giả lập user (chỉ prod):** xem [MONITORING.md](MONITORING.md).
 
