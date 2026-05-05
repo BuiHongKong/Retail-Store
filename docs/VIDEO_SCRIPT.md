@@ -10,15 +10,19 @@ Script for presenting or recording each section. Read as-is or use as bullet poi
 
 "Hi, this is Plush Haven — a plush toy e‑commerce site I built full‑stack, from frontend and backend to database and infrastructure on AWS.
 
-In this video I’ll: quickly demo the app for both users and admins, walk through the architecture and tech stack, then go through each skill set I used — frontend, backend, database, auth, cloud, CI/CD, and monitoring. The goal is to give you a clear picture of the system and the skills applied in this project."
+In this video I’ll: quickly demo the app for shoppers and admins — including customer login and the admin area — walk through the architecture and tech stack, then go through each skill set I used — frontend, backend, database, auth, cloud, CI/CD, and monitoring. The goal is to give you a clear picture of the system and the skills applied in this project."
 
 ---
 
-## Part 2. App demo — User (1:00–1:15)
+## Part 2. App demo — User (1:30–1:45)
 
-*[Browser: open homepage]*
+*[Browser: `/login` or `/register` — start here]*
 
-"This is the Plush Haven homepage. Users can browse products, filter by category — character, food, animal — and switch between English and Vietnamese."
+"The flow starts with auth: Register collects email and password; Login uses the same credentials. The Auth service checks the user, hashes passwords with bcrypt, and issues a JWT. The frontend keeps the token and attaches it to API calls that need it."
+
+*[After signing in: open homepage / shop]*
+
+"Once they’re logged in, they can browse the shop — the Plush Haven homepage — filter by category — character, food, animal — and switch between English and Vietnamese."
 
 *[Click a product]*
 
@@ -26,7 +30,7 @@ In this video I’ll: quickly demo the app for both users and admins, walk throu
 
 *[Add to cart, open cart, go to checkout]*
 
-"At checkout, the user enters address and phone and chooses COD or card payment. This is a simulated flow; it doesn’t call a real payment gateway. When the Auth service is enabled, users must log in or register before using the shop."
+"At checkout, the user enters address and phone and chooses COD or card payment. This is a simulated flow; it doesn’t call a real payment gateway. Checkout runs as this logged-in customer. **Orders** lists their past purchases from the Auth service when they want to review history."
 
 ---
 
@@ -52,7 +56,7 @@ The frontend is React 19 with Vite 7 and TypeScript. The backend is Node.js and 
 
 *[Optional: open VS Code — frontend and backend folders]*
 
-"On the frontend I use React with TypeScript, Vite for build and dev, React Router for the SPA, and react-i18next for i18n. Structure includes pages — Home, Checkout, Login, Register, Orders — and admin: Orders, Products. API calls go through Vite’s proxy to the right backend by path.
+"On the frontend I use React with TypeScript, Vite for build and dev, React Router for the SPA. Structure includes pages — Home, Checkout, Login, Register, Orders — and admin: Orders, Products. API calls go through Vite’s proxy to the right backend by path.
 
 On the backend, each service has its own entry point — main, cart, checkout, auth, admin — all using Express and Prisma. The Prisma schema is defined once and shared across services. Auth and admin use JWT and bcrypt; cart and checkout use the x-cart-session header to tie the cart to a session. For admin image uploads: when the S3 env var is set we write to S3, otherwise we store locally for dev. Each service also exposes a GET /metrics endpoint with prom-client for Prometheus to scrape."
 
@@ -70,9 +74,15 @@ On the backend, each service has its own entry point — main, cart, checkout, a
 
 *[Optional: open terraform-prod folder, .github/workflows]*
 
-"Infrastructure is written in Terraform with two environments: staging and prod. Both have VPC, ALB path-based routing, ECS Fargate for the frontend and five backends, ECR, and RDS PostgreSQL. Prod adds service discovery — Cloud Map — so Prometheus can scrape backends via internal DNS, and an observability module: Prometheus, Grafana, and Loki. Prod image uploads use S3; the bucket and IAM are defined in Terraform too.
+"Infrastructure is written in Terraform with two environments: staging and prod. Both have VPC, ALB path-based routing, ECS Fargate for the frontend and five backends, ECR, and RDS PostgreSQL. Prod adds service discovery — Cloud Map — so Prometheus can scrape backends via internal DNS, and an observability module: Prometheus, Grafana, and Loki. Prod image uploads use S3; the bucket and IAM are defined in Terraform too. If a production ECS deploy goes wrong, Rollback Prod — a GitHub Actions workflow — reverts the service to the previous task definition without undoing the whole Terraform stack.
 
 CI/CD runs on GitHub Actions. A push to main triggers a build of frontend and backend, push to ECR, and deploy to ECS staging. When staging looks good, I promote the code to the prod repo and run the Deploy to Prod workflow there. There’s a Rollback Prod workflow to revert to the previous task definition if needed, and a Seed Prod workflow to run the database seed once. The prod load test runs with k6 and can be triggered manually or on a schedule."
+
+### Example (optional on camera): button color → staging → prod → rollback
+
+*[Optional: diff or component with the button, staging URL, prod URL, GitHub Actions — Deploy to Prod then Rollback Prod]*
+
+"Concrete example: I change a button color in the React UI — a small, visible-only change — commit, and push to main. Actions builds the frontend image, pushes to ECR, and ECS staging rolls to the new task definition. I hit the staging site and confirm the button looks right. Then I promote that commit to the prod repo and manually run Deploy to Prod; production ECS moves forward to the same image I already validated. If something is wrong in prod — contrast, layout, anything — I don’t roll back Terraform; I run Rollback Prod, and ECS restores the previous task definition so users see the old button again quickly."
 
 ---
 
@@ -80,9 +90,9 @@ CI/CD runs on GitHub Actions. A push to main triggers a build of frontend and ba
 
 *[Screen: Grafana — Infra and Business dashboards]*
 
-"Monitoring is enabled only in production. Prometheus scrapes the /metrics endpoint of each backend via service discovery; Grafana is reached at /grafana on the same ALB. I have two dashboards: Infra — request rate, latency, 5xx errors, and CPU and memory from Node Exporter; and Business — login rate, total logins, checkout by payment method, top products, and sales by category. The business metrics — auth_logins_total, checkout_payments_total, product_sales_total — are incremented in the auth and checkout services on real events. App logs are sent to Loki via a Promtail sidecar.
+"Monitoring is enabled only in production. Prometheus scrapes each backend via service discovery, and Grafana is reached at /grafana on the same ALB. I use two dashboards: Infrastructure stats for system health and performance, and Business stats for user and sales activity. App logs are sent to Loki via a Promtail sidecar.
 
-The load test is written in k6 and simulates the flow: register, login, view product, add to cart, and checkout with COD or card. The script runs from GitHub Actions or locally with BASE_URL pointing at the prod ALB to generate traffic and populate the business metrics on the dashboard."
+The load test is written in k6 and simulates the flow: register, login, view product, add to cart, and checkout with COD or card. The script runs from GitHub Actions or locally with BASE URL pointing at the prod ALB to generate traffic and populate the business metrics on the dashboard."
 
 ---
 
@@ -90,7 +100,7 @@ The load test is written in k6 and simulates the flow: register, login, view pro
 
 *[Optional: back to homepage or repo screen]*
 
-"In short, this is a full-stack app with React and Express, a PostgreSQL database, deployed on AWS with Terraform, CI/CD with GitHub Actions, and monitoring with Prometheus and Grafana. The repo includes a README for setup and running locally, MONITORING for observability and load testing, COST-ESTIMATE for AWS costs, and in the docs folder there’s material for DevOps interview prep. Thanks for watching; if you want to see the code or read more, check out the repo. Bye."
+"If you want a deeper visual walkthrough, visit this architecture page: https://buihongkong.github.io/Portfolio/pages/plush-haven-docs.html. I’ll leave the link in the description. Thanks for watching, and see you in the next one."
 
 ---
 
@@ -100,5 +110,3 @@ The load test is written in k6 and simulates the flow: register, login, view pro
 - For the demo: have staging or prod and sample data ready so nothing fails on camera.
 - For code/infra: a quick pass over folders and one or two key files is enough; no need to read every line.
 - You can shorten sentences in any section to hit your target length.
-
-push
