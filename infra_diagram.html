@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plush Haven — AWS Infrastructure Diagram</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.4);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-1: #38bdf8;
+            --accent-2: #818cf8;
+            --accent-3: #f97316;
+            --accent-4: #10b981;
+        }
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background:
+                radial-gradient(circle at 15% 10%, rgba(56,189,248,0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 90%, rgba(129,140,248,0.15) 0%, transparent 40%),
+                var(--bg-dark);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .ambient-orb {
+            position: fixed; border-radius: 50%;
+            filter: blur(80px); z-index: -1; opacity: 0.5;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .orb-1 { width:400px;height:400px;background:var(--accent-1);top:-100px;left:-100px; }
+        .orb-2 { width:300px;height:300px;background:var(--accent-2);bottom:10%;right:5%;animation-delay:-5s; }
+        @keyframes float {
+            0%   { transform: translate(0,0) scale(1); }
+            100% { transform: translate(50px,50px) scale(1.1); }
+        }
+        .container {
+            max-width: 1700px; margin: 0 auto;
+            padding: 60px 20px;
+            display: flex; flex-direction: column; gap: 40px;
+        }
+        .header { text-align: center; margin-bottom: 20px; animation: fadeDown 1s ease-out; }
+        @keyframes fadeDown {
+            from { opacity:0; transform:translateY(-20px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        h1 {
+            font-size: 3rem; font-weight: 700; margin: 0 0 10px 0;
+            background: linear-gradient(135deg, var(--text-main) 0%, #cbd5e1 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+        .subtitle { font-size: 1.25rem; color: var(--accent-1); font-weight: 300; margin: 0; }
+        .env-badge {
+            display: inline-block; padding: 4px 14px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 600; letter-spacing: 1px;
+            margin: 0 6px;
+        }
+        .badge-staging { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-prod    { background: rgba(249,115,22,0.15);  color: #f97316; border: 1px solid rgba(249,115,22,0.3); }
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 1.2s ease-out forwards; opacity: 0;
+        }
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.6), 0 0 20px rgba(56,189,248,0.1);
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        .section-title {
+            font-size: 1.6rem; font-weight: 600; margin: 0 0 24px 0;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .section-title::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, var(--glass-border), transparent);
+        }
+        .diagram-wrapper {
+            display: flex; justify-content: center;
+            overflow-x: auto; padding: 20px 0; width: 100%;
+        }
+        .mermaid { width: 100%; display: flex; justify-content: center; }
+        .mermaid svg {
+            width: 100%; min-width: 1300px; max-width: none;
+            height: auto !important;
+            filter: drop-shadow(0px 10px 20px rgba(0,0,0,0.3));
+        }
+        .legend {
+            display: flex; justify-content: center; gap: 24px;
+            margin-top: 20px; flex-wrap: wrap; font-size: 0.9rem; color: #cbd5e1;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-dot { width: 22px; height: 22px; border-radius: 5px; flex-shrink: 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 22px; }
+        .card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 14px; padding: 22px;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100%; height: 2px;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .card:hover { background: rgba(255,255,255,0.05); transform: translateY(-3px); }
+        .card:hover::before { opacity: 1; }
+        .card-icon {
+            font-size: 1.4rem; margin-bottom: 12px; display: inline-block;
+            background: rgba(56,189,248,0.1); color: var(--accent-1);
+            padding: 10px; border-radius: 10px;
+        }
+        .card h3 { margin: 0 0 8px 0; font-size: 1.15rem; color: #e2e8f0; }
+        .card p  { margin: 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+        code {
+            background: rgba(56,189,248,0.1); color: var(--accent-1);
+            border-radius: 4px; padding: 1px 5px; font-size: 0.85em;
+        }
+        .tag {
+            display: inline-block; font-size: 0.72rem; padding: 2px 8px;
+            border-radius: 10px; font-weight: 600; margin-left: 6px; vertical-align: middle;
+        }
+        .tag-prod    { background: rgba(249,115,22,0.2);  color: #f97316; }
+        .tag-both    { background: rgba(56,189,248,0.2);  color: #38bdf8; }
+    </style>
+</head>
+<body>
+<div class="ambient-orb orb-1"></div>
+<div class="ambient-orb orb-2"></div>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="header">
+        <h1>Plush Haven — AWS Infrastructure</h1>
+        <p class="subtitle">
+            ECS Fargate · RDS PostgreSQL · S3 · ECR · Observability Stack
+            &nbsp;|&nbsp; Region: <strong>ap-southeast-1</strong>
+        </p>
+        <div style="margin-top:12px;">
+            <span class="env-badge badge-staging">STAGING — 10.0.0.0/16</span>
+            <span class="env-badge badge-prod">PRODUCTION — 10.1.0.0/16</span>
+        </div>
+    </header>
+
+    <!-- ── DIAGRAM ── -->
+    <section class="glass-panel" style="animation-delay:0.2s;">
+        <h2 class="section-title">🗺️ Architecture Diagram (Production View)</h2>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+flowchart TD
+    classDef def      fill:#1e293b,stroke:#475569,stroke-width:1px,color:#f8fafc;
+    classDef transp   fill:none,stroke:none,color:#cbd5e1;
+    classDef vpc      fill:#0f172a99,stroke:#38bdf8,stroke-width:3px,stroke-dasharray:5 5,color:#38bdf8;
+    classDef pubsub   fill:#10b9810d,stroke:#10b981,stroke-width:1px,color:#10b981;
+    classDef privsub  fill:#818cf80d,stroke:#818cf8,stroke-width:1px,color:#818cf8;
+    classDef ecs_hi   fill:#1e40af,stroke:#60a5fa,stroke-width:2px,color:#fff;
+    classDef ecs_lo   fill:#1e3a5f,stroke:#60a5fa,stroke-width:1px,color:#bfdbfe;
+    classDef obs      fill:#2d1b00,stroke:#f97316,stroke-width:2px,color:#f97316;
+    classDef db       fill:#052e16,stroke:#10b981,stroke-width:2px,color:#6ee7b7;
+    classDef s3       fill:#1c1917,stroke:#a78bfa,stroke-width:2px,color:#c4b5fd;
+    classDef ecr      fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#a5b4fc;
+    classDef ext      fill:#0f172a,stroke:#475569,stroke-width:1px,color:#94a3b8;
+    classDef alb      fill:#0c1a2e,stroke:#38bdf8,stroke-width:2px,color:#7dd3fc;
+
+    User(("🌐 Internet User")):::transp
+    GHA(("🐙 GitHub Actions")):::transp
+
+    User -->|"HTTP :80"| ALB
+
+    subgraph VPC["☁️ AWS VPC — retail-store-{env}"]
+        direction TB
+
+        subgraph PUB["Public Subnets (2 AZs)"]
+            direction LR
+            PubA["ap-southeast-1a\n10.x.0.0/24"]:::pubsub
+            PubB["ap-southeast-1b\n10.x.1.0/24"]:::pubsub
+        end
+
+        IGW["🔀 Internet Gateway"]:::def
+        ALB["⚖️ ALB — retail-store-{env}\nHTTP :80 · Path-based routing"]:::alb
+        NAT["🔁 NAT Gateway\n(optional — cost flag)"]:::def
+
+        subgraph PRIV["Private Subnets (2 AZs)"]
+            direction TB
+
+            subgraph ECS_CLUSTER["🚀 ECS Cluster (Fargate) — retail-store-{env}"]
+                FE["Frontend\n:80 · React/Vite/Nginx"]:::ecs_hi
+                MAIN["main · :3000\n/api + /uploads"]:::ecs_hi
+                CART["cart · :3001\n/api/cart"]:::ecs_hi
+                CHK["checkout · :3002\n/api/checkout"]:::ecs_hi
+                AUTH["auth · :3003\n/api/auth + /api/orders"]:::ecs_lo
+                ADM["admin · :3004\n/api/admin"]:::ecs_lo
+
+                subgraph OBS["📊 Observability Stack — prod only"]
+                    PROM["Prometheus\n:9090\nScrape /metrics port 3000-3004\n+ Node Exporter :9100"]:::obs
+                    GRAF["Grafana\n:3000 → ALB /grafana\nCustom ECR image"]:::obs
+                    LOKI["Loki\n:3100\nloki.retail-store.local"]:::obs
+                end
+            end
+
+            subgraph DATA["Data Layer"]
+                RDS[("🗄️ RDS PostgreSQL 15\ndb.t3.micro · 20GB\nretail_store DB\nPort 5432")]:::db
+            end
+        end
+    end
+
+    subgraph AWS_GLOBAL["☁️ AWS Global Services"]
+        ECR_FE[("ECR\nretail-store-frontend-{env}\nLifecycle: keep 10")]:::ecr
+        ECR_BE[("ECR\nretail-store-backend-{env}\nLifecycle: keep 10")]:::ecr
+        S3[("S3\nretail-store-{env}-uploads-{acct}\nPublic read (product images)")]:::s3
+        CW["☁️ CloudWatch Logs\n/ecs/retail-store-{env}-*\nRetention: 7 days"]:::ext
+        SD["🔍 Cloud Map\nretail-store.local\nmain/cart/checkout/auth/admin\nprometheus · loki"]:::ext
+    end
+
+    %% Internet path
+    IGW --> PUB
+    PUB --> ALB
+
+    %% ALB path-based routing
+    ALB -->|"default → /*"| FE
+    ALB -->|"/api/admin*  prio 10"| ADM
+    ALB -->|"/api/cart*   prio 20"| CART
+    ALB -->|"/api/checkout* prio 30"| CHK
+    ALB -->|"/api/orders* + /api/auth* prio 40-50"| AUTH
+    ALB -->|"/api* + /uploads* prio 60"| MAIN
+    ALB -->|"/grafana  prod"| GRAF
+
+    %% NAT
+    PubA -.->|EIP| NAT
+    PRIV -.->|outbound| NAT
+
+    %% Data connections
+    MAIN & CART & CHK & AUTH & ADM -->|"Prisma · :5432"| RDS
+    ADM -->|"PutObject / GetObject"| S3
+
+    %% Observability (prod)
+    PROM -->|"Cloud Map DNS scrape"| SD
+    SD -.->|"resolves"| MAIN & CART & CHK & AUTH & ADM
+    GRAF -->|"query"| PROM & LOKI
+
+    %% ECR
+    GHA -->|"aws-credentials\n(Access Key)"| ECR_FE & ECR_BE
+    ECS_CLUSTER -->|"pull images"| ECR_FE & ECR_BE
+
+    %% Logs
+    ECS_CLUSTER -.->|"awslogs driver"| CW
+
+    class VPC vpc
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot" style="border:3px dashed #38bdf8;background:#0f172a99;"></div>
+                <span><strong>VPC Boundary</strong></span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="border:2px solid #60a5fa;background:#1e40af;"></div>
+                <span><strong>ECS Fargate</strong> (scale 1→6)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="border:2px solid #60a5fa;background:#1e3a5f;"></div>
+                <span><strong>ECS Fargate</strong> (scale 1→2)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="border:2px solid #f97316;background:#2d1b00;"></div>
+                <span><strong>Observability</strong> (prod only)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="border:2px solid #10b981;background:#052e16;"></div>
+                <span><strong>RDS PostgreSQL</strong></span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="border:2px solid #a78bfa;background:#1c1917;"></div>
+                <span><strong>S3 Uploads</strong></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── COMPONENT BREAKDOWN ── -->
+    <section class="glass-panel explanation-section" style="animation-delay:0.4s;">
+        <h2 class="section-title">🔩 Component Breakdown</h2>
+        <div class="grid">
+
+            <div class="card">
+                <div class="card-icon">☁️</div>
+                <h3>VPC & Networking <span class="tag tag-both">Both Envs</span></h3>
+                <p>Two isolated VPCs: <code>10.0.0.0/16</code> (staging) and <code>10.1.0.0/16</code> (prod). Each spans <strong>2 Availability Zones</strong> with a public subnet for the ALB and private subnets for ECS tasks and RDS. A NAT Gateway is optional (flag-controlled) — when disabled, ECS tasks run in public subnets with a public IP for ECR pulls.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">⚖️</div>
+                <h3>Application Load Balancer <span class="tag tag-both">Both Envs</span></h3>
+                <p>A single internet-facing ALB sits in the public subnets. It uses <strong>path-based listener rules</strong> (priority-ordered): <code>/api/admin*</code> → Admin (p10), <code>/api/cart*</code> → Cart (p20), <code>/api/checkout*</code> → Checkout (p30), <code>/api/orders*</code> + <code>/api/auth*</code> → Auth (p40/50), <code>/api*</code> + <code>/uploads*</code> → Main (p60). Everything else hits the Frontend (default). Prod also routes <code>/grafana</code> to Grafana.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🚀</div>
+                <h3>ECS Fargate — 6 Services <span class="tag tag-both">Both Envs</span></h3>
+                <p>All containers are <strong>serverless Fargate</strong> (no EC2 to manage). Each task is <code>256 CPU / 512 MB</code>. Services: <strong>Frontend</strong> (Vite/Nginx :80), <strong>Main</strong> (:3000), <strong>Cart</strong> (:3001), <strong>Checkout</strong> (:3002), <strong>Auth</strong> (:3003), <strong>Admin</strong> (:3004). One shared backend image is distinguished at runtime by the <code>SERVICE</code> env variable via <code>entrypoint.sh</code>.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📈</div>
+                <h3>ECS Auto-Scaling <span class="tag tag-prod">Prod Only</span></h3>
+                <p>Application Auto Scaling with <strong>Target Tracking at CPU 70%</strong>. Scale-out cooldown: 60s. Scale-in cooldown: 180s.<br><br>
+                <strong>Frontend, Main, Cart, Checkout:</strong> min 1, max <strong>6</strong><br>
+                <strong>Auth, Admin:</strong> min 1, max <strong>2</strong> (lower traffic, cost-saving)</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🗄️</div>
+                <h3>RDS PostgreSQL 15 <span class="tag tag-both">Both Envs</span></h3>
+                <p>Managed <code>db.t3.micro</code> instance with 20 GB of storage. Database name: <code>retail_store</code>. Lives in the private subnets with a dedicated security group — <strong>only ECS tasks on port 5432 can connect</strong>. Schema is managed by Prisma; seed runs as a one-off ECS task via CI/CD.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📦</div>
+                <h3>ECR Repositories <span class="tag tag-both">Both Envs</span></h3>
+                <p>Two private ECR repos per environment: <code>retail-store-frontend-{env}</code> and <code>retail-store-backend-{env}</code>. Images are tagged <code>staging-{sha}</code> / <code>staging-latest</code> or <code>prod-{sha}</code> / <code>prod-latest</code>. A lifecycle policy retains the <strong>last 10 images</strong> automatically. Prod also has a <code>retail-store-grafana-prod</code> repo for the custom Grafana image.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🗃️</div>
+                <h3>S3 — Product Image Uploads <span class="tag tag-both">Both Envs</span></h3>
+                <p>One S3 bucket per environment for admin-uploaded product images. Configured with <strong>public read</strong> so image URLs work directly in browsers. The ECS task role has a least-privilege IAM policy allowing only <code>PutObject</code> and <code>GetObject</code> on this specific bucket.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📊</div>
+                <h3>Observability — LGTM Stack <span class="tag tag-prod">Prod Only</span></h3>
+                <p><strong>Prometheus</strong> scrapes <code>GET /metrics</code> from all 5 backend services (ports 3000–3004) and <strong>Node Exporter</strong> sidecars (port 9100) for CPU/memory. <strong>Loki</strong> (<code>loki.retail-store.local:3100</code>) handles log aggregation. <strong>Grafana</strong> (custom ECR image with pre-provisioned dashboards) is exposed at ALB path <code>/grafana</code>. Service addresses are resolved via <strong>AWS Cloud Map</strong> private DNS namespace <code>retail-store.local</code>.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🔍</div>
+                <h3>Cloud Map — Service Discovery <span class="tag tag-prod">Prod Only</span></h3>
+                <p>Private DNS namespace <code>retail-store.local</code> is registered in the prod VPC. Each backend ECS service registers its IP, enabling Prometheus to resolve <code>main.retail-store.local:3000</code>, <code>cart.retail-store.local:3001</code>, etc. without hardcoded IPs. Prometheus and Loki themselves are also registered so Grafana can reach them.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🔒</div>
+                <h3>Security Groups <span class="tag tag-both">Both Envs</span></h3>
+                <p><strong>ALB SG:</strong> ingress HTTP :80 from <code>0.0.0.0/0</code>.<br>
+                <strong>ECS SG:</strong> ingress :80 and :3000–3004 from ALB SG only. In prod, also ingress :3000–3004 and :9100 from the Observability SG for Prometheus scraping.<br>
+                <strong>RDS SG:</strong> ingress :5432 from ECS SG only. No public database access.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🔄</div>
+                <h3>CI/CD Pipeline — GitHub Actions <span class="tag tag-both">Both Envs</span></h3>
+                <p>Push to <code>main</code> triggers: (1) lint frontend, (2) build Docker images with <code>staging-{sha}</code> and <code>staging-latest</code> tags, (3) push to ECR, (4) rolling <code>update-service</code> on all 6 ECS services, (5) one-shot Prisma seed task. <strong>Prod deploy</strong> is a separate job gated by a <code>prod</code> GitHub Environment approval. It tags the current <code>prod-latest</code> as <code>prod-previous</code> first (enabling 1-step rollback), then builds and deploys fresh images.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">📝</div>
+                <h3>CloudWatch Logs <span class="tag tag-both">Both Envs</span></h3>
+                <p>Every ECS task uses the <code>awslogs</code> log driver. A dedicated log group is created per service: <code>/ecs/retail-store-{env}-frontend</code>, <code>/ecs/retail-store-{env}-main</code>, etc. Retention is set to <strong>7 days</strong> to prevent runaway costs. IAM execution role has <code>AmazonECSTaskExecutionRolePolicy</code> for ECR pull and CloudWatch write access.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ── CI/CD FLOW ── -->
+    <section class="glass-panel" style="animation-delay:0.6s;">
+        <h2 class="section-title">🔄 CI/CD Delivery Flow</h2>
+        <div class="diagram-wrapper">
+            <div class="mermaid">
+flowchart LR
+    classDef step fill:#1e293b,stroke:#475569,color:#f8fafc;
+    classDef gate fill:#2d1b00,stroke:#f97316,color:#f97316;
+    classDef env  fill:#052e16,stroke:#10b981,color:#6ee7b7;
+
+    C["📝 git push → main"]:::step
+    L["🧪 Lint Frontend\n(npm run lint)"]:::step
+    B["🐳 Docker Build\nFrontend + Backend"]:::step
+    E["📦 Push to ECR\nstaging-{sha} + staging-latest"]:::step
+    S["🚀 Deploy Staging\nECS update-service ×6"]:::env
+    DB["🌱 Prisma Seed\nrun-task (one-off)"]:::step
+    G["🔐 GitHub Environment\nApproval Gate: prod"]:::gate
+    TP["🏷️ Tag prod-previous\n(rollback target)"]:::step
+    BP["🐳 Build + Push Prod\nprod-{sha} + prod-latest"]:::step
+    P["🚀 Deploy Prod\nECS update-service ×6"]:::env
+
+    C --> L --> B --> E --> S --> DB --> G
+    G --> TP --> BP --> P
+
+    style G fill:#2d1b00,stroke:#f97316,color:#f97316
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        themeVariables: { fontSize: '18px', fontFamily: 'Outfit, sans-serif' },
+        securityLevel: 'loose',
+        flowchart: { curve: 'basis', nodeSpacing: 60, rankSpacing: 70, padding: 20 }
+    });
+</script>
+</body>
+</html>
